@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador IRPF 2026 — Estratégia FAPI/PGBL</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --card:      #1c2330;
+      --border:    #30363d;
+      --primary:   #2ea043;
+      --primary-d: #238636;
+      --accent:    #58a6ff;
+      --warn:      #d29922;
+      --danger:    #f85149;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    /* ── Layout ── */
+    .wrapper { max-width: 820px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .badge {
+      display: inline-block;
+      background: #1f3a2a;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #2ea04340;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+    }
+    header h1 span { color: var(--primary); }
+    header p {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 520px;
+      margin-inline: auto;
+    }
+
+    /* ── Step indicator ── */
+    .steps {
+      display: flex;
+      gap: 0;
+      margin-bottom: 32px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .step-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .step-item:last-child { border-right: none; }
+    .step-item.active { background: var(--card); color: var(--text); }
+    .step-item.done { color: var(--primary); }
+    .step-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-item.active .step-num { background: var(--accent); color: #0d1117; }
+    .step-item.done .step-num  { background: var(--primary); color: #0d1117; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .icon { font-size: 16px; }
+
+    /* ── Form ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .field-grid.single { grid-template-columns: 1fr; }
+    @media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .field small {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: .7;
+      margin-top: -2px;
+    }
+    .field input, .field select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field input.currency { padding-left: 36px; }
+    .input-wrap { position: relative; }
+    .input-wrap .prefix {
+      position: absolute;
+      left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .toggle-group {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .toggle-group label {
+      flex: 1;
+      text-align: center;
+      padding: 9px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      border-right: 1px solid var(--border);
+      text-transform: none;
+      letter-spacing: 0;
+      user-select: none;
+    }
+    .toggle-group label:last-child { border-right: none; }
+    .toggle-group input[type="radio"] { display: none; }
+    .toggle-group input[type="radio"]:checked + label {
+      background: var(--accent);
+      color: #0d1117;
+    }
+
+    .hint-box {
+      background: #1a2535;
+      border: 1px solid #2a3a55;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #7aa8d4;
+      margin-top: 8px;
+    }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-d); }
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--text); color: var(--text); }
+    .btn-danger { background: transparent; color: var(--danger); border: 1px solid #f8514930; }
+    .btn-danger:hover { background: #f8514915; }
+
+    /* ── Results ── */
+    #results { display: none; }
+    .result-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .result-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .result-header p { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .kpi.highlight { border-color: var(--primary); background: #1a2e1f; }
+    .kpi.warn     { border-color: var(--warn);    background: #231d0e; }
+    .kpi.accent   { border-color: var(--accent);  background: #131d2e; }
+    .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+    .kpi-value { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
+    .kpi.highlight .kpi-value { color: var(--primary); }
+    .kpi.highlight .kpi-label { color: var(--primary); }
+    .kpi.warn .kpi-value      { color: var(--warn); }
+    .kpi.warn .kpi-label      { color: var(--warn); }
+    .kpi.accent .kpi-value    { color: var(--accent); }
+    .resultado-kpi { text-align: center; }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr.total td { font-weight: 700; color: var(--text); }
+    tr.highlight-row td { background: #1a2e1f; color: var(--primary); font-weight: 600; }
+    .text-right { text-align: right; }
+    .text-green { color: var(--primary); }
+    .text-red   { color: var(--danger); }
+    .text-warn  { color: var(--warn); }
+    .text-muted { color: var(--muted); }
+
+    /* ── Strategy ── */
+    .strategy-box {
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      background: #0f1f14;
+      padding: 22px;
+    }
+    .strategy-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .strategy-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #2a3a2a;
+      font-size: 13px;
+    }
+    .strategy-row:last-child { border-bottom: none; }
+    .strategy-row .label { color: var(--muted); }
+    .strategy-row .value { font-weight: 600; }
+
+    .verdict {
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .verdict.green { background: #1a2e1f; border: 1px solid #2ea04340; color: var(--primary); }
+    .verdict.blue  { background: #131d2e; border: 1px solid #58a6ff40; color: var(--accent); }
+    .verdict.warn  { background: #231d0e; border: 1px solid #d2992240; color: var(--warn); }
+    .verdict .vc-icon { font-size: 20px; flex-shrink: 0; }
+
+    /* ── Aliquota bar ── */
+    .bar-wrap { margin-top: 10px; }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .bar-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width .8s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── INSS computed preview ── */
+    .inss-computed {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .inss-computed .inss-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .inss-computed-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── INSS tooltip ── */
+    .inss-help-wrap {
+      position: relative;
+      display: inline-flex;
+      margin-left: auto;
+    }
+    .inss-help-btn {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: help;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s, color .15s;
+    }
+    .inss-help-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .inss-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 10px);
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      min-width: 340px;
+      z-index: 100;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    .inss-help-wrap:hover .inss-tooltip { display: block; }
+    .inss-tooltip h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .inss-tooltip table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .inss-tooltip th {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+    .inss-tooltip th:first-child { text-align: left; }
+    .inss-tooltip td {
+      padding: 5px 6px;
+      border-bottom: 1px solid #1e252e;
+      text-align: right;
+      color: var(--text);
+    }
+    .inss-tooltip td:first-child { text-align: left; color: var(--muted); }
+    .inss-tooltip tr.tt-total td {
+      font-weight: 700;
+      color: var(--accent);
+      border-bottom: none;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+    .inss-tooltip .tt-aliq { color: var(--warn); font-weight: 600; }
+
+    /* ── Sporadic entries ── */
+    .sporadic-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .sporadic-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    .sporadic-entry .se-month { color: var(--muted); min-width: 80px; }
+    .sporadic-entry .se-value { flex: 1; font-weight: 600; color: var(--text); }
+    .sporadic-entry .se-remove {
+      background: none; border: none; color: var(--danger); cursor: pointer;
+      font-size: 16px; padding: 0 4px; line-height: 1; opacity: .7;
+    }
+    .sporadic-entry .se-remove:hover { opacity: 1; }
+    .add-sporadic-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      margin-top: 8px;
+    }
+    .add-sporadic-row .field { flex: 1; margin: 0; }
+    .btn-sm {
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .btn-sm:hover { background: #1a2e1f; }
+    .sporadic-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .sporadic-total .st-val { font-weight: 700; color: var(--accent); }
+
+    /* ── Reference links ── */
+    .ref-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      opacity: .7;
+      transition: opacity .15s;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    .ref-link:hover { opacity: 1; text-decoration: underline; }
+    .ref-link .ref-icon {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      flex-shrink: 0;
+    }
+    .refs-footer {
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .refs-footer h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .refs-footer ul {
+      list-style: none;
+      padding: 0;
+    }
+    .refs-footer li {
+      padding: 4px 0;
+      font-size: 11px;
+    }
+    .refs-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      opacity: .8;
+    }
+    .refs-footer a:hover { opacity: 1; text-decoration: underline; }
+    .refs-footer .ref-tag {
+      display: inline-block;
+      background: #131d2e;
+      border: 1px solid #58a6ff30;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* ── Notice ── */
+    .notice {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warn);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+
+    /* ── Section divider ── */
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Comparison ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: var(--surface);
+    }
+    .compare-card.recommended { border-color: var(--primary); background: #0f1f14; }
+    .compare-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .compare-card h4 .rec-badge {
+      background: var(--primary);
+      color: #0d1117;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .compare-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .compare-row:last-child { border-bottom: none; }
+    .compare-row .cv { font-weight: 600; color: var(--text); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Ano-calendário 2026</div>
+    <h1>Simulador <span>IRPF 2026</span><br>Estratégia FAPI / PGBL</h1>
+    <p>Calcule seu imposto, alíquota efetiva e descubra quanto economizar com previdência complementar.<br>
+    <span style="font-size:11px;opacity:.6">Valores oficiais: Lei 15.191/2025 (tabela) + Lei 15.270/2025 (redutor e desc. simplificado)</span></p>
+  </header>
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step-item active" id="step-nav-1">
+      <div class="step-num">1</div>
+      <div><b>Dados</b><br><small style="font-size:11px;color:inherit;opacity:.7">Renda e Deduções</small></div>
+    </div>
+    <div class="step-item" id="step-nav-2">
+      <div class="step-num">2</div>
+      <div><b>Cálculo</b><br><small style="font-size:11px;color:inherit;opacity:.7">Imposto Devido</small></div>
+    </div>
+    <div class="step-item" id="step-nav-3">
+      <div class="step-num">3</div>
+      <div><b>Estratégia</b><br><small style="font-size:11px;color:inherit;opacity:.7">FAPI / PGBL</small></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ FORM ═══════════════════ -->
+  <div id="form-section">
+
+    <!-- Bloco A: Renda -->
+    <div class="card">
+      <div class="card-title"><span class="icon">💰</span> Bloco A — Renda
+        <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" class="ref-link"><span class="ref-icon">&#8599;</span>IRPF 2026</a>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Tipo de Entrada</label>
+          <div class="toggle-group">
+            <input type="radio" name="inputType" id="t-mensal" value="mensal" checked>
+            <label for="t-mensal">Mensal</label>
+            <input type="radio" name="inputType" id="t-anual" value="anual">
+            <label for="t-anual">Anual</label>
+          </div>
+        </div>
+        <div class="field">
+          <label id="rendaLabel">Salário Bruto Mensal</label>
+          <small>Inclua pro-labore. Exclua 13º e PLR.</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="rendaPrincipal" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Outras Rendas Tributáveis (mensal)</label>
+          <small>Aluguel, autônomo, etc.</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="outrasRendas" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field">
+          <label>13º Salário (anual)</label>
+          <small>Tributação exclusiva — informativo.</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="decimoTerceiro" placeholder="0,00" />
+          </div>
+        </div>
+      </div>
+
+      <!-- IRRF -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div class="field-grid">
+          <div class="field">
+            <label>IRRF — Imposto Retido na Fonte</label>
+            <div class="toggle-group">
+              <input type="radio" name="irrfMode" id="irrf-auto" value="auto" checked>
+              <label for="irrf-auto">Calcular auto</label>
+              <input type="radio" name="irrfMode" id="irrf-manual" value="manual">
+              <label for="irrf-manual">Informar</label>
+            </div>
+          </div>
+          <div class="field" id="irrfAutoPreview">
+            <label>IRRF Estimado <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" class="ref-link"><span class="ref-icon">&#8599;</span>Tabela IRPF</a></label>
+            <small>Valor retido pelo empregador mensalmente</small>
+            <div class="inss-computed">
+              <span class="inss-val" id="irrfComputedVal">R$ 0,00</span>
+              <span class="inss-computed-sub" id="irrfComputedAnual">Anual: R$ 0,00</span>
+            </div>
+          </div>
+          <div class="field" id="irrfManualField" style="display:none">
+            <label>IRRF Total Anual</label>
+            <small>Confira no Informe de Rendimentos</small>
+            <div class="input-wrap">
+              <span class="prefix">R$</span>
+              <input type="text" class="currency" id="irrfManual" placeholder="0,00" />
+            </div>
+          </div>
+        </div>
+        <div class="hint-box" style="margin-top:8px">
+          O IRRF é o imposto que a empresa já desconta do seu salário todo mês. Na declaração, ele é subtraído do imposto apurado: se você pagou mais do que deve, recebe restituição.
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloco B: Deduções -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🔻</span> Bloco B — Deduções
+        <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" class="ref-link"><span class="ref-icon">&#8599;</span>Receita Federal</a>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Número de Dependentes</label>
+          <small>R$ 189,59/mês por dependente</small>
+          <input type="number" id="dependentes" placeholder="0" min="0" max="20" />
+        </div>
+        <div class="field">
+          <label>INSS</label>
+          <div class="toggle-group">
+            <input type="radio" name="inssMode" id="inss-auto" value="auto" checked>
+            <label for="inss-auto">Calcular auto</label>
+            <input type="radio" name="inssMode" id="inss-manual" value="manual">
+            <label for="inss-manual">Informar</label>
+          </div>
+        </div>
+        <div class="field" id="inssField" style="display:none">
+          <label>INSS Mensal Descontado</label>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="inssManual" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field" id="inssAutoPreview">
+          <label>INSS Calculado <a href="https://www.contabilizei.com.br/contabilidade-online/tabela-inss/" target="_blank" rel="noopener" class="ref-link"><span class="ref-icon">&#8599;</span>Tabela INSS</a></label>
+          <small>Baseado no salário bruto e vínculo</small>
+          <div class="inss-computed">
+            <span class="inss-val" id="inssComputedVal">R$ 0,00</span>
+            <span class="inss-computed-sub" id="inssComputedAnual">Anual: R$ 0,00</span>
+            <div class="inss-help-wrap">
+              <div class="inss-help-btn">?</div>
+              <div class="inss-tooltip" id="inssTooltip">
+                <h4>Cálculo Progressivo do INSS</h4>
+                <table>
+                  <thead>
+                    <tr><th>Faixa</th><th>Alíquota</th><th>Base</th><th>Contrib.</th></tr>
+                  </thead>
+                  <tbody id="inssTooltipBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Vínculo Empregatício</label>
+          <select id="vinculo">
+            <option value="clt">CLT (RGPS)</option>
+            <option value="servidor">Servidor Público (RPPS)</option>
+            <option value="autonomo">Autônomo (RGPS)</option>
+            <option value="socio">Sócio / Pro-labore</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Despesas Médicas (anual)</label>
+          <small>Plano de saúde, consultas, cirurgias — sem limite</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="despMedicas" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Despesas de Educação (anual)</label>
+          <small>Faculdade, escola — limite R$ 3.561,50/pessoa</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="despEducacao" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Pensão Alimentícia (mensal)</label>
+          <small>Apenas judicial — sem limite</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="pensao" placeholder="0,00" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloco C: Previdência -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🏦</span> Bloco C — Previdência Complementar
+        <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" class="ref-link"><span class="ref-icon">&#8599;</span>Limite 12%</a>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Possui Previdência Complementar?</label>
+          <div class="toggle-group">
+            <input type="radio" name="prevType" id="prev-nao" value="nao" checked>
+            <label for="prev-nao">Não possuo</label>
+            <input type="radio" name="prevType" id="prev-pgbl" value="pgbl">
+            <label for="prev-pgbl">PGBL</label>
+            <input type="radio" name="prevType" id="prev-vgbl" value="vgbl">
+            <label for="prev-vgbl">VGBL</label>
+          </div>
+        </div>
+        <div class="field" id="prevValorField" style="display:none">
+          <label>Aplicação Mensal Fixa</label>
+          <small>Valor debitado todo mês automaticamente</small>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="prevMensal" placeholder="0,00" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Aportes esporádicos -->
+      <div id="sporadicSection" style="display:none; margin-top:16px">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Aplicações Esporádicas</label>
+        <small style="display:block;font-size:11px;color:var(--muted);opacity:.7;margin:4px 0 8px">Aportes extras feitos ao longo do ano (ex: bônus, sobra de caixa)</small>
+        <div class="sporadic-list" id="sporadicList"></div>
+        <div class="add-sporadic-row">
+          <div class="field">
+            <label>Mês</label>
+            <select id="sporadicMonth">
+              <option value="Jan">Janeiro</option>
+              <option value="Fev">Fevereiro</option>
+              <option value="Mar">Março</option>
+              <option value="Abr">Abril</option>
+              <option value="Mai">Maio</option>
+              <option value="Jun">Junho</option>
+              <option value="Jul">Julho</option>
+              <option value="Ago">Agosto</option>
+              <option value="Set">Setembro</option>
+              <option value="Out">Outubro</option>
+              <option value="Nov">Novembro</option>
+              <option value="Dez">Dezembro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor</label>
+            <div class="input-wrap">
+              <span class="prefix">R$</span>
+              <input type="text" class="currency" id="sporadicValue" placeholder="0,00" />
+            </div>
+          </div>
+          <button class="btn-sm" type="button" onclick="addSporadic()">+ Adicionar</button>
+        </div>
+        <div class="sporadic-total" id="sporadicTotal" style="display:none">
+          <span>Total de aportes esporádicos no ano</span>
+          <span class="st-val" id="sporadicTotalVal">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="hint-box" id="prevHint" style="margin-top:14px">
+        O PGBL permite deduzir até 12% da renda bruta tributável. O VGBL não é dedutível do IR — mas pode fazer parte da estratégia patrimonial.
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="resetForm()">Limpar</button>
+      <button class="btn btn-primary" onclick="calcular()">&#9654;&#xFE0E; Calcular IRPF</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ RESULTS ═══════════════════ -->
+  <div id="results">
+
+    <div class="result-header">
+      <h2>Resultado da Simulação</h2>
+      <p id="result-subtitle">Ano-calendário 2026 — Declaração 2027</p>
+    </div>
+
+    <!-- Resultado principal -->
+    <div class="kpi resultado-kpi" id="kpi-resultado-box" style="margin-bottom:16px;padding:20px 24px">
+      <div class="kpi-label" id="kpi-resultado-label">Resultado</div>
+      <div class="kpi-value" id="kpi-resultado" style="font-size:28px">—</div>
+      <div id="kpi-resultado-sub" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi accent">
+        <div class="kpi-label">Renda Bruta Anual</div>
+        <div class="kpi-value" id="kpi-renda">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Base de Cálculo</div>
+        <div class="kpi-value" id="kpi-base">—</div>
+      </div>
+      <div class="kpi warn">
+        <div class="kpi-label">Imposto Apurado</div>
+        <div class="kpi-value" id="kpi-imposto">—</div>
+      </div>
+      <div class="kpi" id="kpi-irrf-box">
+        <div class="kpi-label">IRRF Já Pago</div>
+        <div class="kpi-value" id="kpi-irrf">—</div>
+      </div>
+      <div class="kpi highlight">
+        <div class="kpi-label">Alíquota Efetiva</div>
+        <div class="kpi-value" id="kpi-aliquota">—</div>
+      </div>
+    </div>
+
+    <!-- Aliquota bar -->
+    <div class="bar-wrap card" style="padding:18px 24px">
+      <div class="bar-label">
+        <span>Alíquota Efetiva</span>
+        <span id="bar-pct">0%</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="bar-fill" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px">
+        <span>0% (Isento)</span>
+        <span>27,5% (Teto)</span>
+      </div>
+    </div>
+
+    <!-- Etapa 2: Tabela detalhada -->
+    <div class="section-title">Etapa 2 — Detalhamento do Cálculo</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="text-right">Mensal</th>
+              <th class="text-right">Anual</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-calculo"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modelo Simplificado vs Completo -->
+    <div class="section-title">Comparativo — Modelo de Declaração</div>
+    <div class="compare-grid" id="compare-grid"></div>
+
+    <!-- Etapa 3: Estratégia FAPI/PGBL -->
+    <div class="section-title">Etapa 3 — Estratégia FAPI / PGBL</div>
+
+    <div class="strategy-box">
+      <h3>&#127919;&#xFE0F; Aporte Ideal em Previdência Complementar</h3>
+      <div id="strategy-rows"></div>
+    </div>
+
+    <!-- Sem FAPI vs Com FAPI -->
+    <div class="section-title">Impacto do Aporte — Antes e Depois</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cenário</th>
+              <th class="text-right">Base de Cálculo</th>
+              <th class="text-right">Imposto</th>
+              <th class="text-right">Alíquota Efetiva</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-cenarios"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div id="verdict-box"></div>
+
+    <div class="notice">
+      &#9888; Simulação baseada nas regras oficiais para o ano-calendário 2026, incluindo o Redutor de Imposto (Lei 15.270/2025) para isenção até R$&nbsp;5.000/mês com redução gradual até R$&nbsp;7.350/mês. Consulte um contador para planejamento definitivo.
+    </div>
+
+    <!-- Fontes oficiais -->
+    <div class="card refs-footer">
+      <h4>Fontes Oficiais</h4>
+      <ul>
+        <li><span class="ref-tag">1</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener">Receita Federal — Tabelas IRPF 2026 (faixas, alíquotas, deduções)</a></li>
+        <li><span class="ref-tag">2</span><a href="https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/01/nova-tabela-do-ir-veja-faixas-e-aliquotas-e-saiba-mais-sobre-medida-que-isenta-o-pagamento-para-quem-ganha-ate-r-5-mil" target="_blank" rel="noopener">Gov.br — Nova Tabela IR: faixas, alíquotas e isenção até R$ 5 mil</a></li>
+        <li><span class="ref-tag">3</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-191-2025" target="_blank" rel="noopener">Receita Federal — Exemplos de aplicação da Lei 15.270/2025 (redutor)</a></li>
+        <li><span class="ref-tag">4</span><a href="https://www.contabilizei.com.br/contabilidade-online/tabela-inss/" target="_blank" rel="noopener">Tabela INSS 2026 — Alíquotas progressivas e teto (R$ 8.475,55)</a></li>
+        <li><span class="ref-tag">5</span><a href="https://www.sager.adv.br/novo-limite-desconto-simplificado-irpf-2026/" target="_blank" rel="noopener">Lei 15.270/2025 — Desconto simplificado: novo teto R$ 17.640,00</a></li>
+      </ul>
+    </div>
+
+    <div class="actions" style="margin-top:24px">
+      <button class="btn btn-outline" onclick="voltarForm()">&#8592; Editar Dados</button>
+      <button class="btn btn-primary" onclick="window.print()">&#128438; Imprimir</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════ SCRIPT ═════════════════════ -->
+<script>
+// ── Formatação ──────────────────────────────────────────────────────────────
+const BRL = v => 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const PCT = v => v.toFixed(2).replace('.', ',') + '%';
+const parseVal = s => parseFloat((s || '0').replace(/\./g, '').replace(',', '.')) || 0;
+
+function maskCurrency(el) {
+  el.addEventListener('input', () => {
+    let v = el.value.replace(/\D/g, '');
+    if (!v) { el.value = ''; return; }
+    v = (parseInt(v, 10) / 100).toFixed(2);
+    el.value = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  });
+}
+document.querySelectorAll('input.currency').forEach(maskCurrency);
+
+// Aplica máscara nos inputs dinâmicos (existem no DOM desde o início)
+maskCurrency(document.getElementById('sporadicValue'));
+maskCurrency(document.getElementById('irrfManual'));
+
+// ── Tabelas tributárias 2026 (oficiais) ─────────────────────────────────────
+// Fontes:
+//   INSS: Portaria Interministerial MPS/MF nº 6/2026
+//   IRPF: Lei nº 15.191/2025 (tabela) + Lei nº 15.270/2025 (redutor)
+//   Desc. Simplificado: Lei nº 15.270/2025
+//   Receita Federal: gov.br/receitafederal/tabelas/2026
+
+// INSS 2026 — tabela progressiva (Salário mínimo R$ 1.621,00 / Teto R$ 8.475,55)
+const INSS_FAIXAS = [
+  { ate: 1621.00,  aliq: 0.075 },
+  { ate: 2902.84,  aliq: 0.090 },
+  { ate: 4354.27,  aliq: 0.120 },
+  { ate: 8475.55,  aliq: 0.140 },
+];
+// Teto = 121.58 + 115.37 + 174.17 + 576.98 = 988.09
+const INSS_TETO_MENSAL = 988.09;
+
+// IRPF 2026 — tabela progressiva ANUAL (Lei 15.191/2025)
+const IRPF_FAIXAS = [
+  { ate: 29145.60, aliq: 0.000, deducao: 0        },
+  { ate: 33919.80, aliq: 0.075, deducao: 2185.92  },
+  { ate: 45012.60, aliq: 0.150, deducao: 4729.91  },
+  { ate: 55976.16, aliq: 0.225, deducao: 8105.85  },
+  { ate: Infinity, aliq: 0.275, deducao: 10904.66 },
+];
+
+// Redutor 2026 (Lei 15.270/2025) — isenção efetiva até R$ 5.000/mês
+// Fórmula anual oficial: redutor = 8.429,73 − (0,095575 × base anual)
+// Até R$ 60.000/ano: redutor zera o imposto (max R$ 2.694,15)
+// De R$ 60.000,01 a R$ 88.200: redutor decresce linearmente
+// Acima de R$ 88.200: sem redutor
+const REDUTOR_BASE_TETO    = 88200;   // 7.350 * 12
+const REDUTOR_BASE_ISENTO  = 60000;   // 5.000 * 12
+const REDUTOR_COEF_A       = 8429.73; // constante da fórmula oficial
+const REDUTOR_COEF_B       = 0.095575; // coeficiente multiplicador
+
+// Desconto simplificado 2026 (Lei 15.270/2025)
+const DESC_SIMPLIFICADO_TETO = 17640.00;
+
+function calcINSS(salBrutoMensal) {
+  let inss = 0;
+  for (let i = 0; i < INSS_FAIXAS.length; i++) {
+    const prev = i === 0 ? 0 : INSS_FAIXAS[i - 1].ate;
+    const faixa = Math.min(salBrutoMensal, INSS_FAIXAS[i].ate) - prev;
+    if (faixa <= 0) break;
+    inss += faixa * INSS_FAIXAS[i].aliq;
+    if (salBrutoMensal <= INSS_FAIXAS[i].ate) break;
+  }
+  return Math.min(inss, INSS_TETO_MENSAL);
+}
+
+// Retorna array com detalhamento por faixa para exibir no tooltip
+function calcINSSDetalhado(salBrutoMensal) {
+  const faixas = [];
+  let total = 0;
+  for (let i = 0; i < INSS_FAIXAS.length; i++) {
+    const prev = i === 0 ? 0 : INSS_FAIXAS[i - 1].ate;
+    const base = Math.min(salBrutoMensal, INSS_FAIXAS[i].ate) - prev;
+    if (base <= 0) break;
+    const contrib = base * INSS_FAIXAS[i].aliq;
+    total += contrib;
+    faixas.push({
+      de: prev,
+      ate: Math.min(salBrutoMensal, INSS_FAIXAS[i].ate),
+      aliq: INSS_FAIXAS[i].aliq,
+      base,
+      contrib
+    });
+    if (salBrutoMensal <= INSS_FAIXAS[i].ate) break;
+  }
+  return { faixas, total: Math.min(total, INSS_TETO_MENSAL) };
+}
+
+function calcIRPF(baseAnual) {
+  if (baseAnual <= 0) return 0;
+  let imposto = 0;
+  for (const f of IRPF_FAIXAS) {
+    if (baseAnual <= f.ate) {
+      imposto = baseAnual * f.aliq - f.deducao;
+      break;
+    }
+  }
+  imposto = Math.max(0, imposto);
+
+  // Aplica redutor 2026 (Lei 15.270/2025)
+  // Fórmula oficial anual: redutor = 8.429,73 − (0,095575 × base anual)
+  if (baseAnual <= REDUTOR_BASE_ISENTO) {
+    // Até R$ 60.000/ano: redutor zera o imposto
+    imposto = 0;
+  } else if (baseAnual < REDUTOR_BASE_TETO) {
+    // De R$ 60.000,01 a R$ 88.200: redutor decresce linearmente
+    const redutor = REDUTOR_COEF_A - (REDUTOR_COEF_B * baseAnual);
+    imposto = Math.max(0, imposto - Math.max(0, redutor));
+  }
+
+  return imposto;
+}
+
+// Tabela progressiva MENSAL para cálculo do IRRF na fonte (Lei 15.191/2025)
+const IRPF_FAIXAS_MENSAL = [
+  { ate: 2428.80, aliq: 0.000, deducao: 0      },
+  { ate: 2826.65, aliq: 0.075, deducao: 182.16 },
+  { ate: 3751.05, aliq: 0.150, deducao: 394.16 },
+  { ate: 4664.68, aliq: 0.225, deducao: 675.49 },
+  { ate: Infinity, aliq: 0.275, deducao: 908.73 },
+];
+
+// Redutor MENSAL (Lei 15.270/2025): até R$ 5.000 → redutor max R$ 312,89
+// Fórmula: 978,62 − (0,133145 × renda bruta mensal)
+const REDUTOR_MENSAL_COEF_A = 978.62;
+const REDUTOR_MENSAL_COEF_B = 0.133145;
+const REDUTOR_MENSAL_RENDA_ISENTA = 5000.00;
+const REDUTOR_MENSAL_RENDA_TETO   = 7350.00;
+
+// Calcula IRRF mensal retido na fonte (o que a empresa desconta)
+function calcIRRFMensal(rendaBrutaMensal) {
+  // Base = renda - INSS - desconto simplificado mensal (R$ 607,20)
+  const inss = calcINSS(rendaBrutaMensal);
+  const descSimplificadoMensal = 607.20;
+  const base = rendaBrutaMensal - inss - descSimplificadoMensal;
+  if (base <= 0) return 0;
+
+  let imposto = 0;
+  for (const f of IRPF_FAIXAS_MENSAL) {
+    if (base <= f.ate) {
+      imposto = base * f.aliq - f.deducao;
+      break;
+    }
+  }
+  imposto = Math.max(0, imposto);
+
+  // Aplica redutor mensal
+  if (rendaBrutaMensal <= REDUTOR_MENSAL_RENDA_ISENTA) {
+    imposto = 0;
+  } else if (rendaBrutaMensal < REDUTOR_MENSAL_RENDA_TETO) {
+    const redutor = REDUTOR_MENSAL_COEF_A - (REDUTOR_MENSAL_COEF_B * rendaBrutaMensal);
+    imposto = Math.max(0, imposto - Math.max(0, redutor));
+  }
+
+  return imposto;
+}
+
+// ── Helpers UI ───────────────────────────────────────────────────────────────
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('step-nav-' + i);
+    el.classList.remove('active','done');
+    if (i < n)  el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  });
+}
+
+// Toggle INSS manual / auto
+function updateINSSVisibility() {
+  const isManual = document.getElementById('inss-manual').checked;
+  document.getElementById('inssField').style.display = isManual ? 'flex' : 'none';
+  document.getElementById('inssAutoPreview').style.display = isManual ? 'none' : 'flex';
+  if (!isManual) updateINSSPreview();
+}
+document.querySelectorAll('input[name="inssMode"]').forEach(r => {
+  r.addEventListener('change', updateINSSVisibility);
+});
+
+// Atualiza preview do INSS calculado automaticamente
+function updateINSSPreview() {
+  if (document.getElementById('inss-manual').checked) return;
+  const inputType = document.querySelector('input[name="inputType"]:checked').value;
+  const rendaRaw = parseVal(document.getElementById('rendaPrincipal').value);
+  const vinculo = document.getElementById('vinculo').value;
+
+  let salBase = inputType === 'anual' ? rendaRaw / 12 : rendaRaw;
+
+  const detalhe = calcINSSDetalhado(salBase);
+  const inssMensal = detalhe.total;
+
+  document.getElementById('inssComputedVal').textContent = BRL(inssMensal);
+  document.getElementById('inssComputedAnual').textContent = 'Anual: ' + BRL(inssMensal * 12);
+
+  // Preenche tooltip com faixas
+  const tbody = document.getElementById('inssTooltipBody');
+  if (detalhe.faixas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Informe o salário</td></tr>';
+    return;
+  }
+  const BRL2 = v => v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  tbody.innerHTML = detalhe.faixas.map(f =>
+    `<tr>
+      <td>${BRL2(f.de)} a ${BRL2(f.ate)}</td>
+      <td class="tt-aliq">${(f.aliq * 100).toFixed(1)}%</td>
+      <td>${BRL2(f.base)}</td>
+      <td>${BRL2(f.contrib)}</td>
+    </tr>`
+  ).join('') +
+    `<tr class="tt-total">
+      <td colspan="2">Total INSS</td>
+      <td></td>
+      <td>${BRL2(detalhe.total)}</td>
+    </tr>`;
+}
+
+// Reage a mudanças no salário, tipo de entrada e vínculo
+function updateAllPreviews() { updateINSSPreview(); updateIRRFPreview(); }
+document.getElementById('rendaPrincipal').addEventListener('input', updateAllPreviews);
+document.getElementById('vinculo').addEventListener('change', updateAllPreviews);
+document.querySelectorAll('input[name="inputType"]').forEach(r => {
+  r.addEventListener('change', updateAllPreviews);
+});
+
+// Toggle IRRF manual / auto
+function updateIRRFVisibility() {
+  const isManual = document.getElementById('irrf-manual').checked;
+  document.getElementById('irrfManualField').style.display = isManual ? 'flex' : 'none';
+  document.getElementById('irrfAutoPreview').style.display = isManual ? 'none' : 'flex';
+  if (!isManual) updateIRRFPreview();
+}
+document.querySelectorAll('input[name="irrfMode"]').forEach(r => {
+  r.addEventListener('change', updateIRRFVisibility);
+});
+
+// Atualiza preview do IRRF calculado automaticamente
+function updateIRRFPreview() {
+  if (document.getElementById('irrf-manual').checked) return;
+  const inputType = document.querySelector('input[name="inputType"]:checked').value;
+  const rendaRaw = parseVal(document.getElementById('rendaPrincipal').value);
+  let salBase = inputType === 'anual' ? rendaRaw / 12 : rendaRaw;
+
+  const irrfMensal = calcIRRFMensal(salBase);
+  document.getElementById('irrfComputedVal').textContent = BRL(irrfMensal);
+  document.getElementById('irrfComputedAnual').textContent = 'Anual: ' + BRL(irrfMensal * 12);
+}
+
+// Toggle tipo de entrada
+document.querySelectorAll('input[name="inputType"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('rendaLabel').textContent =
+      document.getElementById('t-anual').checked
+        ? 'Renda Tributável Anual'
+        : 'Salário Bruto Mensal';
+  });
+});
+
+// Toggle previdência
+document.querySelectorAll('input[name="prevType"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const v = document.querySelector('input[name="prevType"]:checked').value;
+    document.getElementById('prevValorField').style.display = v !== 'nao' ? 'flex' : 'none';
+    document.getElementById('sporadicSection').style.display = v !== 'nao' ? 'block' : 'none';
+    document.getElementById('prevHint').textContent = v === 'vgbl'
+      ? 'VGBL não é dedutível do IRPF. Considere migrar para PGBL para aproveitar os 12% de dedução.'
+      : 'O PGBL permite deduzir até 12% da renda bruta tributável anual.';
+  });
+});
+
+// ── Aportes esporádicos ─────────────────────────────────────────────────────
+const sporadicEntries = [];
+
+function addSporadic() {
+  const month = document.getElementById('sporadicMonth').value;
+  const valEl = document.getElementById('sporadicValue');
+  const value = parseVal(valEl.value);
+  if (value <= 0) return;
+  sporadicEntries.push({ month, value });
+  valEl.value = '';
+  renderSporadics();
+}
+
+function removeSporadic(idx) {
+  sporadicEntries.splice(idx, 1);
+  renderSporadics();
+}
+
+function renderSporadics() {
+  const list = document.getElementById('sporadicList');
+  const totalEl = document.getElementById('sporadicTotal');
+  const totalValEl = document.getElementById('sporadicTotalVal');
+
+  if (sporadicEntries.length === 0) {
+    list.innerHTML = '';
+    totalEl.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = sporadicEntries.map((e, i) =>
+    `<div class="sporadic-entry">
+      <span class="se-month">${e.month}</span>
+      <span class="se-value">${BRL(e.value)}</span>
+      <button class="se-remove" onclick="removeSporadic(${i})" title="Remover">&times;</button>
+    </div>`
+  ).join('');
+
+  const total = sporadicEntries.reduce((s, e) => s + e.value, 0);
+  totalValEl.textContent = BRL(total);
+  totalEl.style.display = 'flex';
+}
+
+function getSporadicTotal() {
+  return sporadicEntries.reduce((s, e) => s + e.value, 0);
+}
+
+// ── Cálculo principal ────────────────────────────────────────────────────────
+function calcular() {
+  // Leitura dos inputs
+  const inputType      = document.querySelector('input[name="inputType"]:checked').value;
+  const rendaRaw       = parseVal(document.getElementById('rendaPrincipal').value);
+  const outrasRendasM  = parseVal(document.getElementById('outrasRendas').value);
+  const decimoTerceiro = parseVal(document.getElementById('decimoTerceiro').value);
+  const dependentes    = parseInt(document.getElementById('dependentes').value) || 0;
+  const vinculo        = document.getElementById('vinculo').value;
+  const inssMode       = document.querySelector('input[name="inssMode"]:checked').value;
+  const inssManualM    = parseVal(document.getElementById('inssManual').value);
+  const despMedAnual   = parseVal(document.getElementById('despMedicas').value);
+  const despEduAnual   = Math.min(parseVal(document.getElementById('despEducacao').value), 3561.50 * (dependentes + 1));
+  const pensaoM        = parseVal(document.getElementById('pensao').value);
+  const prevType       = document.querySelector('input[name="prevType"]:checked').value;
+  const prevMensalVal  = parseVal(document.getElementById('prevMensal').value);
+
+  // Renda mensal / anual
+  let rendaMensal, rendaAnual;
+  if (inputType === 'anual') {
+    rendaAnual  = rendaRaw + (outrasRendasM * 12);
+    rendaMensal = rendaAnual / 12;
+  } else {
+    rendaMensal = rendaRaw + outrasRendasM;
+    rendaAnual  = rendaMensal * 12;
+  }
+
+  if (rendaAnual <= 0) {
+    alert('Informe sua renda para continuar.');
+    return;
+  }
+
+  // INSS
+  let inssMensal;
+  if (inssMode === 'manual') {
+    inssMensal = inssManualM;
+  } else {
+    const salBase = inputType === 'anual' ? rendaRaw / 12 : rendaRaw;
+    inssMensal = (vinculo === 'clt' || vinculo === 'autonomo' || vinculo === 'socio')
+      ? calcINSS(salBase)
+      : calcINSS(salBase); // simplificação — RPPS usa tabela própria
+    if (vinculo === 'servidor') inssMensal = Math.min(inssMensal * 1.14 / 0.14 * 0.11, INSS_TETO_MENSAL);
+  }
+  const inssAnual = inssMensal * 12;
+
+  // Dependentes
+  const deducaoDependentesM    = dependentes * 189.59;
+  const deducaoDependentesAnual = deducaoDependentesM * 12;
+
+  // Pensão
+  const pensaoAnual = pensaoM * 12;
+
+  // PGBL atual (mensal fixo + aportes esporádicos)
+  const sporadicTotal  = prevType === 'pgbl' ? getSporadicTotal() : 0;
+  const prevAnualAtual = prevType === 'pgbl' ? (prevMensalVal * 12) + sporadicTotal : 0;
+
+  // ── Base de cálculo (modelo completo) ──
+  const totalDeducoesAnual = inssAnual + deducaoDependentesAnual + despMedAnual + despEduAnual + pensaoAnual + prevAnualAtual;
+  const baseCompleta = Math.max(0, rendaAnual - totalDeducoesAnual);
+
+  // ── Modelo simplificado ──
+  const descontoSimp = Math.min(rendaAnual * 0.20, DESC_SIMPLIFICADO_TETO);
+  const baseSimplificada = Math.max(0, rendaAnual - descontoSimp);
+
+  // ── Impostos ──
+  const impostoCompleto     = calcIRPF(baseCompleta);
+  const impostoSimplificado = calcIRPF(baseSimplificada);
+
+  const melhorModelo = impostoCompleto <= impostoSimplificado ? 'completo' : 'simplificado';
+  const impostoFinal  = Math.min(impostoCompleto, impostoSimplificado);
+  const baseFinal     = melhorModelo === 'completo' ? baseCompleta : baseSimplificada;
+
+  // Alíquota efetiva
+  const aliqEfetiva = rendaAnual > 0 ? (impostoFinal / rendaAnual) * 100 : 0;
+
+  // ── IRRF (Imposto Retido na Fonte) ──
+  const irrfMode = document.querySelector('input[name="irrfMode"]:checked').value;
+  let irrfAnual;
+  if (irrfMode === 'manual') {
+    irrfAnual = parseVal(document.getElementById('irrfManual').value);
+  } else {
+    const salBase = inputType === 'anual' ? rendaRaw / 12 : rendaRaw;
+    irrfAnual = calcIRRFMensal(salBase) * 12;
+  }
+
+  // Resultado final: negativo = restituição, positivo = a pagar
+  const resultadoCompleto     = impostoCompleto - irrfAnual;
+  const resultadoSimplificado = impostoSimplificado - irrfAnual;
+  const resultadoFinal = melhorModelo === 'completo' ? resultadoCompleto : resultadoSimplificado;
+
+  // ── PGBL/FAPI estratégia ──
+  const pgblMaxAnual   = rendaAnual * 0.12;
+  const pgblFaltante   = Math.max(0, pgblMaxAnual - prevAnualAtual);
+  const pgblFaltanteM  = pgblFaltante / 12;
+
+  // Imposto SEM nenhum PGBL
+  const baseSemPGBL   = Math.max(0, rendaAnual - (inssAnual + deducaoDependentesAnual + despMedAnual + despEduAnual + pensaoAnual));
+  const impostoSemPGBL = calcIRPF(baseSemPGBL);
+
+  // Imposto COM PGBL no teto
+  const baseComPGBLTeto = Math.max(0, baseSemPGBL - pgblMaxAnual);
+  const impostoComPGBL  = calcIRPF(baseComPGBLTeto);
+
+  const economiaPGBL = Math.max(0, impostoSemPGBL - impostoComPGBL);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Renderização
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // KPIs
+  document.getElementById('kpi-renda').textContent    = BRL(rendaAnual);
+  document.getElementById('kpi-base').textContent     = BRL(baseFinal);
+  document.getElementById('kpi-imposto').textContent  = BRL(impostoFinal);
+  document.getElementById('kpi-irrf').textContent     = BRL(irrfAnual);
+  document.getElementById('kpi-aliquota').textContent = PCT(aliqEfetiva);
+
+  // Resultado principal (restituição / a pagar)
+  const resBox   = document.getElementById('kpi-resultado-box');
+  const resLabel = document.getElementById('kpi-resultado-label');
+  const resValue = document.getElementById('kpi-resultado');
+  const resSub   = document.getElementById('kpi-resultado-sub');
+  resBox.classList.remove('highlight', 'warn');
+  if (resultadoFinal < 0) {
+    resBox.classList.add('highlight');
+    resLabel.textContent = 'Imposto a Restituir';
+    resValue.textContent = BRL(Math.abs(resultadoFinal));
+    resSub.textContent = `Imposto apurado ${BRL(impostoFinal)} − IRRF pago ${BRL(irrfAnual)}`;
+  } else if (resultadoFinal > 0) {
+    resBox.classList.add('warn');
+    resLabel.textContent = 'Imposto a Pagar';
+    resValue.textContent = BRL(resultadoFinal);
+    resSub.textContent = `Imposto apurado ${BRL(impostoFinal)} − IRRF pago ${BRL(irrfAnual)}`;
+  } else {
+    resLabel.textContent = 'Resultado';
+    resValue.textContent = 'R$ 0,00';
+    resSub.textContent = 'Nenhum imposto a pagar ou restituir';
+  }
+
+  // IRRF KPI styling
+  const irrfBox = document.getElementById('kpi-irrf-box');
+  irrfBox.style.borderColor = 'var(--accent)';
+  irrfBox.style.background = '#131d2e';
+
+  // Bar
+  const barPct = Math.min(aliqEfetiva / 27.5 * 100, 100);
+  document.getElementById('bar-fill').style.width = barPct + '%';
+  document.getElementById('bar-pct').textContent  = PCT(aliqEfetiva);
+
+  // Tabela Etapa 2
+  const rows = [
+    ['Renda Bruta Tributável', rendaMensal, rendaAnual, 'neutral'],
+    ['(-) INSS', -inssMensal, -inssAnual, 'red'],
+    ['(-) Dependentes (' + dependentes + ')', -deducaoDependentesM, -deducaoDependentesAnual, 'red'],
+    ['(-) Despesas Médicas', null, -despMedAnual, 'red'],
+    ['(-) Despesas de Educação', null, -despEduAnual, 'red'],
+    ['(-) Pensão Alimentícia', -pensaoM, -pensaoAnual, 'red'],
+    ...(prevAnualAtual > 0 ? [['(-) PGBL/FAPI (atual)', -prevMensalVal, -prevAnualAtual, 'red']] : []),
+    ['= Base de Cálculo (Completo)', null, baseCompleta, 'total'],
+    ['= Base de Cálculo (Simplificado)', null, baseSimplificada, 'total'],
+    ['Imposto Apurado (Completo)', null, impostoCompleto, 'warn'],
+    ['Imposto Apurado (Simplificado)', null, impostoSimplificado, 'warn'],
+    ['(-) IRRF Pago na Fonte', null, -irrfAnual, 'green'],
+    ['= Resultado (Completo)', null, resultadoCompleto, resultadoCompleto < 0 ? 'restituir' : 'pagar'],
+    ['= Resultado (Simplificado)', null, resultadoSimplificado, resultadoSimplificado < 0 ? 'restituir' : 'pagar'],
+  ];
+
+  document.getElementById('tbl-calculo').innerHTML = rows.map(([label, m, a, cls]) => {
+    const isTotal = cls === 'total';
+    const isWarn  = cls === 'warn';
+    const isRed   = cls === 'red' && a !== 0;
+    const isGreen = cls === 'green' && a !== 0;
+    const isRestituir = cls === 'restituir';
+    const isPagar = cls === 'pagar';
+    const mStr = m !== null ? BRL(Math.abs(m)) : '—';
+    let aStr;
+    if (isRestituir) aStr = BRL(Math.abs(a));
+    else if (isPagar) aStr = BRL(Math.abs(a));
+    else aStr = BRL(Math.abs(a));
+    const colorM = isRed && m ? 'text-red' : isGreen && m ? 'text-green' : '';
+    const colorA = isRed ? 'text-red' : isWarn ? 'text-warn' : isGreen ? 'text-green' : isRestituir ? 'text-green' : isPagar ? 'text-red' : '';
+    const rowCls = isTotal ? 'total' : (isRestituir || isPagar) ? 'total' : '';
+    const prefix = isRestituir ? '(Restituir) ' : isPagar && a > 0 ? '(A pagar) ' : '';
+    return `<tr class="${rowCls}">
+      <td>${label}</td>
+      <td class="text-right ${colorM}">${mStr}</td>
+      <td class="text-right ${colorA}">${prefix}${aStr}</td>
+    </tr>`;
+  }).join('');
+
+  // Comparativo modelos
+  const cRec = melhorModelo;
+  function resTag(val) {
+    if (val < 0) return `<span class="cv text-green">(Restituir) ${BRL(Math.abs(val))}</span>`;
+    if (val > 0) return `<span class="cv text-red">(A pagar) ${BRL(val)}</span>`;
+    return `<span class="cv">R$ 0,00</span>`;
+  }
+  document.getElementById('compare-grid').innerHTML = `
+    <div class="compare-card ${cRec === 'completo' ? 'recommended' : ''}">
+      <h4>Deduções Legais ${cRec === 'completo' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
+      <div class="compare-row"><span>Deduções Detalhadas</span><span class="cv text-green">${BRL(totalDeducoesAnual)}</span></div>
+      <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseCompleta)}</span></div>
+      <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoCompleto)}</span></div>
+      <div class="compare-row"><span>(-) IRRF Pago</span><span class="cv">${BRL(irrfAnual)}</span></div>
+      <div class="compare-row"><span><b>Resultado</b></span>${resTag(resultadoCompleto)}</div>
+      <div class="compare-row"><span>Alíquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoCompleto / rendaAnual * 100 : 0)}</span></div>
+    </div>
+    <div class="compare-card ${cRec === 'simplificado' ? 'recommended' : ''}">
+      <h4>Desconto Simplificado ${cRec === 'simplificado' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
+      <div class="compare-row"><span>Desconto Fixo (20%)</span><span class="cv text-green">${BRL(descontoSimp)}</span></div>
+      <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseSimplificada)}</span></div>
+      <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoSimplificado)}</span></div>
+      <div class="compare-row"><span>(-) IRRF Pago</span><span class="cv">${BRL(irrfAnual)}</span></div>
+      <div class="compare-row"><span><b>Resultado</b></span>${resTag(resultadoSimplificado)}</div>
+      <div class="compare-row"><span>Alíquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoSimplificado / rendaAnual * 100 : 0)}</span></div>
+    </div>`;
+
+  // Estratégia PGBL
+  const stratRows = [
+    ['Renda Bruta Anual', BRL(rendaAnual), 'neutral'],
+    ['Teto PGBL/FAPI (12%)', BRL(pgblMaxAnual), 'accent'],
+    ['Aporte Mensal Fixo (anual)', BRL(prevMensalVal * 12), 'neutral'],
+    ['Aportes Esporádicos', BRL(sporadicTotal), sporadicTotal > 0 ? 'neutral' : 'muted'],
+    ['Total PGBL Atual (anual)', BRL(prevAnualAtual), prevAnualAtual > 0 ? 'neutral' : 'muted'],
+    ['Aporte Adicional Necessário (anual)', BRL(pgblFaltante), pgblFaltante > 0 ? 'warn' : 'green'],
+    ['Aporte Adicional Necessário (mensal)', BRL(pgblFaltanteM), pgblFaltante > 0 ? 'warn' : 'green'],
+    ['Imposto sem PGBL', BRL(impostoSemPGBL), 'red'],
+    ['Imposto com PGBL no teto', BRL(impostoComPGBL), 'green'],
+    ['Economia de IR com PGBL (anual)', BRL(economiaPGBL), 'highlight'],
+  ];
+
+  document.getElementById('strategy-rows').innerHTML = stratRows.map(([label, value, cls]) => {
+    const colorMap = { highlight: 'text-green', green: 'text-green', accent: 'text-accent', warn: 'text-warn', red: 'text-red' };
+    const colorCls = colorMap[cls] || '';
+    return `<div class="strategy-row">
+      <span class="label">${label}</span>
+      <span class="value ${colorCls}" style="${cls==='accent'?'color:var(--accent)':''}">${value}</span>
+    </div>`;
+  }).join('');
+
+  // Tabela cenários
+  const aliqSem  = rendaAnual > 0 ? impostoSemPGBL  / rendaAnual * 100 : 0;
+  const aliqCom  = rendaAnual > 0 ? impostoComPGBL  / rendaAnual * 100 : 0;
+  document.getElementById('tbl-cenarios').innerHTML = `
+    <tr>
+      <td>Sem PGBL</td>
+      <td class="text-right">${BRL(baseSemPGBL)}</td>
+      <td class="text-right text-red">${BRL(impostoSemPGBL)}</td>
+      <td class="text-right">${PCT(aliqSem)}</td>
+    </tr>
+    <tr>
+      <td>Com aporte atual${prevAnualAtual > 0 ? ' (' + BRL(prevAnualAtual) + '/ano)' : ''}</td>
+      <td class="text-right">${BRL(baseCompleta)}</td>
+      <td class="text-right text-warn">${BRL(impostoCompleto)}</td>
+      <td class="text-right">${PCT(rendaAnual > 0 ? impostoCompleto / rendaAnual * 100 : 0)}</td>
+    </tr>
+    <tr class="highlight-row">
+      <td>Com PGBL no teto (12%) — ${BRL(pgblMaxAnual)}/ano</td>
+      <td class="text-right">${BRL(baseComPGBLTeto)}</td>
+      <td class="text-right">${BRL(impostoComPGBL)}</td>
+      <td class="text-right">${PCT(aliqCom)}</td>
+    </tr>`;
+
+  // Veredicto
+  let verdictHtml = '';
+  if (aliqEfetiva === 0) {
+    verdictHtml = `<div class="verdict green"><span class="vc-icon">🎉</span><span>Você está na faixa de <b>isenção</b> pelo mecanismo de Redutor 2026. Nenhum imposto é devido.</span></div>`;
+  } else if (melhorModelo === 'completo' && economiaPGBL > 200) {
+    verdictHtml = `
+      <div class="verdict green"><span class="vc-icon">✅</span><span>Use a <b>Declaração Completa</b> — suas deduções superam o desconto simplificado.</span></div>
+      <div class="verdict blue" style="margin-top:10px"><span class="vc-icon">💡</span><span>Investindo mais <b>${BRL(pgblFaltante)}/ano</b> em PGBL, você economiza <b>${BRL(economiaPGBL)}</b> de imposto.</span></div>`;
+  } else if (melhorModelo === 'simplificado') {
+    verdictHtml = `
+      <div class="verdict warn"><span class="vc-icon">📋</span><span>O <b>Desconto Simplificado</b> é mais vantajoso para seu perfil — deduções abaixo de 20% da renda.</span></div>
+      ${economiaPGBL > 100 ? `<div class="verdict blue" style="margin-top:10px"><span class="vc-icon">💡</span><span>Ainda assim, aportar em PGBL pode gerar economia de <b>${BRL(economiaPGBL)}</b> ao ano.</span></div>` : ''}`;
+  } else {
+    verdictHtml = `<div class="verdict blue"><span class="vc-icon">ℹ️</span><span>Use a <b>Declaração Completa</b>. Considere elevar aportes em PGBL para maximizar deduções.</span></div>`;
+  }
+  document.getElementById('verdict-box').innerHTML = verdictHtml;
+
+  // Exibe resultados
+  setStep(3);
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function voltarForm() {
+  setStep(1);
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => el.value = '');
+  document.getElementById('dependentes').value = '';
+  sporadicEntries.length = 0;
+  renderSporadics();
+}
+</script>
+</body>
+</html>
