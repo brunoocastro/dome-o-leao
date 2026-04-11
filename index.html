@@ -274,6 +274,97 @@
     .kpi.accent .kpi-value    { color: var(--accent); }
     .resultado-kpi { text-align: center; }
 
+    /* ── Chart bars ── */
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .chart-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 110px;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .chart-row:last-child { border-bottom: none; }
+    .chart-row.chart-active { background: #0f1f14; border-radius: 6px; padding: 8px 6px; }
+    .chart-label { color: var(--muted); font-weight: 500; }
+    .chart-label .tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .chart-label .tag-ideal { background: var(--primary); color: #0d1117; }
+    .chart-label .tag-atual { background: var(--accent); color: #0d1117; }
+    .chart-label .tag-min { background: var(--warn); color: #0d1117; }
+    .chart-bars { position: relative; height: 22px; border-radius: 4px; overflow: hidden; background: var(--border); }
+    .chart-bar-inner {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+      min-width: 2px;
+    }
+    .chart-val { text-align: right; font-weight: 600; font-size: 12px; }
+
+    /* ── Report boxes ── */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 560px) { .report-grid { grid-template-columns: 1fr; } }
+    .report-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .report-item.featured { border-color: var(--primary); background: #0f1f14; }
+    .report-item .ri-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; }
+    .report-item .ri-value { font-size: 20px; font-weight: 700; }
+    .report-item .ri-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Calculator result ── */
+    .calc-result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .calc-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .calc-item .ci-label { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; }
+    .calc-item .ci-value { font-size: 18px; font-weight: 700; }
+    .calc-item .ci-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .calc-item.ci-green { border-color: var(--primary); }
+    .calc-item.ci-green .ci-value { color: var(--primary); }
+    .calc-item.ci-red { border-color: var(--danger); }
+    .calc-item.ci-red .ci-value { color: var(--danger); }
+    .calc-item.ci-accent { border-color: var(--accent); }
+    .calc-item.ci-accent .ci-value { color: var(--accent); }
+    .calc-vs {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 10px 0 0;
+    }
+    .calc-vs b { color: var(--primary); }
+
     /* ── Tables ── */
     .table-wrap { overflow-x: auto; }
     table {
@@ -1021,6 +1112,66 @@
     <!-- Verdict -->
     <div id="verdict-box"></div>
 
+    <!-- ═══ Relatório Completo PGBL ═══ -->
+    <div class="section-title">Relatório — Aporte Ideal PGBL/FAPI</div>
+
+    <!-- Resumo do aporte ideal -->
+    <div class="card" id="report-ideal">
+      <div class="card-title"><span class="icon">&#127919;</span> Aporte Ideal para Máxima Restituição</div>
+      <div id="report-ideal-content"></div>
+    </div>
+
+    <!-- Gráfico comparativo -->
+    <div class="card" id="report-chart-card">
+      <div class="card-title"><span class="icon">&#128202;</span> Comparativo — Resultado por Nível de Aporte PGBL</div>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Restituição</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>A pagar</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Aporte PGBL</span>
+      </div>
+      <div id="report-chart"></div>
+    </div>
+
+    <!-- Aporte mínimo (não perder dinheiro) -->
+    <div class="card" id="report-minimo">
+      <div class="card-title"><span class="icon">&#9888;&#xFE0F;</span> Aporte Mínimo — Não "Perder Dinheiro"</div>
+      <div id="report-minimo-content"></div>
+    </div>
+
+    <!-- Calculadora interativa -->
+    <div class="section-title">Calculadora Interativa de Aportes</div>
+    <div class="card" id="calc-interativo">
+      <div class="card-title"><span class="icon">&#128297;</span> Simule diferentes aportes em PGBL</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Aporte Mensal PGBL</label>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="calcPgblMensal" placeholder="0,00" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Aporte Extra Anual (esporádico)</label>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input type="text" class="currency" id="calcPgblExtra" placeholder="0,00" />
+          </div>
+        </div>
+      </div>
+      <div class="slider-wrap" style="margin-top:14px">
+        <div class="bar-label">
+          <span>Aporte total: <b id="calcSliderLabel">R$ 0,00</b> / ano</span>
+          <span id="calcSliderPct">0% dos 12%</span>
+        </div>
+        <input type="range" id="calcSlider" min="0" max="100" value="0" style="width:100%;accent-color:var(--primary)" />
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px">
+          <span>R$ 0</span>
+          <span id="calcSliderMax">Teto 12%</span>
+        </div>
+      </div>
+      <div id="calc-result" style="margin-top:16px"></div>
+    </div>
+
     <div class="notice">
       &#9888; Simulação baseada nas regras oficiais para o ano-calendário 2026, incluindo o Redutor de Imposto (Lei 15.270/2025) para isenção até R$&nbsp;5.000/mês com redução gradual até R$&nbsp;7.350/mês. Consulte um contador para planejamento definitivo.
     </div>
@@ -1065,6 +1216,8 @@ document.querySelectorAll('input.currency').forEach(maskCurrency);
 // Aplica máscara nos inputs dinâmicos (existem no DOM desde o início)
 maskCurrency(document.getElementById('sporadicValue'));
 maskCurrency(document.getElementById('irrfManual'));
+maskCurrency(document.getElementById('calcPgblMensal'));
+maskCurrency(document.getElementById('calcPgblExtra'));
 
 // ── Tabelas tributárias 2026 (oficiais) ─────────────────────────────────────
 // Fontes:
@@ -1644,11 +1797,255 @@ function calcular() {
   }
   document.getElementById('verdict-box').innerHTML = verdictHtml;
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // Salva estado para calculadora interativa
+  // ──────────────────────────────────────────────────────────────────────────
+  window._simState = {
+    rendaAnual, irrfAnual, inssAnual,
+    deducaoDependentesAnual, despMedAnual, despEduAnual, pensaoAnual,
+    pgblMaxAnual, baseSemPGBL, impostoSemPGBL,
+    prevAnualAtual, impostoCompleto, impostoSimplificado,
+    resultadoCompleto, resultadoSimplificado,
+    melhorModelo, descontoSimp, totalDeducoesAnual
+  };
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Relatório: simulação de vários níveis de aporte
+  // ──────────────────────────────────────────────────────────────────────────
+  renderReport(window._simState);
+  renderCalculadora(window._simState);
+
   // Exibe resultados
   setStep(3);
   document.getElementById('form-section').style.display = 'none';
   document.getElementById('results').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Simula resultado com dado nível de PGBL ─────────────────────────────────
+function simulaPGBL(st, pgblAnual) {
+  // Completo: deduções legais + PGBL
+  const deducoesBase = st.inssAnual + st.deducaoDependentesAnual + st.despMedAnual + st.despEduAnual + st.pensaoAnual;
+  const baseCompl = Math.max(0, st.rendaAnual - deducoesBase - pgblAnual);
+  const impostoCompl = calcIRPF(baseCompl);
+  const resultCompl = impostoCompl - st.irrfAnual;
+  // Simplificado: não muda com PGBL
+  const baseSimp = Math.max(0, st.rendaAnual - Math.min(st.rendaAnual * 0.20, DESC_SIMPLIFICADO_TETO));
+  const impostoSimp = calcIRPF(baseSimp);
+  const resultSimp = impostoSimp - st.irrfAnual;
+  // Melhor modelo
+  const melhor = impostoCompl <= impostoSimp ? 'completo' : 'simplificado';
+  const impostoFinal = Math.min(impostoCompl, impostoSimp);
+  const resultFinal = melhor === 'completo' ? resultCompl : resultSimp;
+  return { pgblAnual, baseCompl, impostoCompl, resultCompl, impostoSimp, resultSimp, melhor, impostoFinal, resultFinal };
+}
+
+// ── Encontra aporte mínimo para não perder dinheiro ─────────────────────────
+function findAporteMinimo(st) {
+  // Se o resultado sem PGBL já é restituição, aporte mínimo = 0
+  const semPGBL = simulaPGBL(st, 0);
+  if (semPGBL.resultFinal <= 0) return { aporte: 0, resultado: semPGBL };
+  // Busca binária: menor aporte que faz resultado <= 0
+  let lo = 0, hi = st.pgblMaxAnual, mid;
+  for (let i = 0; i < 50; i++) {
+    mid = (lo + hi) / 2;
+    const sim = simulaPGBL(st, mid);
+    if (sim.resultFinal > 0) lo = mid; else hi = mid;
+  }
+  const aporte = Math.ceil(hi / 12) * 12; // arredonda para múltiplo de 12 (facilita dividir em meses)
+  return { aporte, resultado: simulaPGBL(st, aporte) };
+}
+
+// ── Renderiza relatório ─────────────────────────────────────────────────────
+function renderReport(st) {
+  // Cenários a simular
+  const cenarios = [];
+  cenarios.push({ label: 'Sem PGBL', tag: '', ...simulaPGBL(st, 0) });
+  if (st.prevAnualAtual > 0) {
+    cenarios.push({ label: 'Aporte Atual', tag: 'atual', ...simulaPGBL(st, st.prevAnualAtual) });
+  }
+  // 25%, 50%, 75% do teto
+  [0.25, 0.50, 0.75].forEach(p => {
+    const v = Math.round(st.pgblMaxAnual * p);
+    cenarios.push({ label: `${Math.round(p*100)}% do teto`, tag: '', ...simulaPGBL(st, v) });
+  });
+  cenarios.push({ label: 'Teto 12%', tag: 'ideal', ...simulaPGBL(st, st.pgblMaxAnual) });
+
+  // Aporte mínimo
+  const minInfo = findAporteMinimo(st);
+
+  // Se o mínimo é > 0 e não é igual ao teto, insere no lugar certo
+  if (minInfo.aporte > 0 && Math.abs(minInfo.aporte - st.pgblMaxAnual) > 100) {
+    const minCenario = { label: 'Aporte Mínimo', tag: 'min', ...simulaPGBL(st, minInfo.aporte) };
+    // Insere na posição correta (ordenado por pgblAnual)
+    let inserted = false;
+    for (let i = 0; i < cenarios.length; i++) {
+      if (cenarios[i].pgblAnual > minInfo.aporte) {
+        cenarios.splice(i, 0, minCenario);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) cenarios.push(minCenario);
+  }
+
+  // Melhor cenário (maior restituição ou menor imposto a pagar)
+  const teto = simulaPGBL(st, st.pgblMaxAnual);
+  const semPgbl = simulaPGBL(st, 0);
+  const economiaIdeal = semPgbl.impostoFinal - teto.impostoFinal;
+
+  // ── Relatório ideal ──
+  const idealMensal = st.pgblMaxAnual / 12;
+  document.getElementById('report-ideal-content').innerHTML = `
+    <div class="report-grid">
+      <div class="report-item featured">
+        <div class="ri-label">Aporte Ideal (teto 12%)</div>
+        <div class="ri-value text-green">${BRL(st.pgblMaxAnual)}<span style="font-size:13px;color:var(--muted)">/ano</span></div>
+        <div class="ri-sub">${BRL(idealMensal)}/mês</div>
+      </div>
+      <div class="report-item featured">
+        <div class="ri-label">Resultado com Aporte Ideal</div>
+        <div class="ri-value ${teto.resultFinal < 0 ? 'text-green' : 'text-red'}">${teto.resultFinal < 0 ? '(Restituir) ' : '(A pagar) '}${BRL(Math.abs(teto.resultFinal))}</div>
+        <div class="ri-sub">Imposto apurado: ${BRL(teto.impostoFinal)}</div>
+      </div>
+      <div class="report-item">
+        <div class="ri-label">Resultado Atual (sem aporte ideal)</div>
+        <div class="ri-value ${semPgbl.resultFinal < 0 ? 'text-green' : 'text-red'}">${semPgbl.resultFinal < 0 ? '(Restituir) ' : '(A pagar) '}${BRL(Math.abs(semPgbl.resultFinal))}</div>
+        <div class="ri-sub">Imposto apurado: ${BRL(semPgbl.impostoFinal)}</div>
+      </div>
+      <div class="report-item">
+        <div class="ri-label">Economia de Imposto</div>
+        <div class="ri-value text-green">${BRL(economiaIdeal)}</div>
+        <div class="ri-sub">Diferença de imposto apurado com vs. sem PGBL</div>
+      </div>
+    </div>
+    ${teto.resultFinal < semPgbl.resultFinal ? `<div class="verdict green" style="margin-top:14px">
+      <span class="vc-icon">&#128176;</span>
+      <span>Com o aporte ideal, ${teto.resultFinal < 0 ? `sua restituição aumenta em <b>${BRL(Math.abs(teto.resultFinal - semPgbl.resultFinal))}</b>` : `você paga <b>${BRL(semPgbl.resultFinal - teto.resultFinal)}</b> a menos de imposto`} e ainda constrói patrimônio na previdência.</span>
+    </div>` : ''}`;
+
+  // ── Gráfico comparativo ──
+  const maxAbsResult = Math.max(...cenarios.map(c => Math.abs(c.resultFinal)), 1);
+  document.getElementById('report-chart').innerHTML = cenarios.map(c => {
+    const pct = Math.abs(c.resultFinal) / maxAbsResult * 100;
+    const isRest = c.resultFinal < 0;
+    const color = isRest ? 'var(--primary)' : 'var(--danger)';
+    const tagHtml = c.tag === 'ideal' ? '<span class="tag tag-ideal">IDEAL</span>'
+      : c.tag === 'atual' ? '<span class="tag tag-atual">ATUAL</span>'
+      : c.tag === 'min' ? '<span class="tag tag-min">MIN</span>' : '';
+    const isActive = c.tag === 'ideal';
+    return `<div class="chart-row ${isActive ? 'chart-active' : ''}">
+      <div class="chart-label">${c.label} ${tagHtml}<br><span style="font-size:10px;color:var(--accent)">${BRL(c.pgblAnual)}/ano</span></div>
+      <div class="chart-bars"><div class="chart-bar-inner" style="width:${pct}%;background:${color}"></div></div>
+      <div class="chart-val" style="color:${color}">${isRest ? '(Restituir)' : '(A pagar)'}<br><b>${BRL(Math.abs(c.resultFinal))}</b></div>
+    </div>`;
+  }).join('');
+
+  // ── Aporte mínimo ──
+  if (minInfo.aporte > 0) {
+    const minMensal = minInfo.aporte / 12;
+    const semRes = semPgbl.resultFinal;
+    document.getElementById('report-minimo-content').innerHTML = `
+      <div class="report-grid">
+        <div class="report-item" style="border-color:var(--warn)">
+          <div class="ri-label">Aporte Mínimo para Resultado Zero</div>
+          <div class="ri-value" style="color:var(--warn)">${BRL(minInfo.aporte)}<span style="font-size:13px;color:var(--muted)">/ano</span></div>
+          <div class="ri-sub">${BRL(minMensal)}/mês</div>
+        </div>
+        <div class="report-item">
+          <div class="ri-label">Sem esse aporte, você pagaria</div>
+          <div class="ri-value text-red">${BRL(Math.abs(semRes))}</div>
+          <div class="ri-sub">de imposto — dinheiro que vai para a Receita em vez do seu patrimônio</div>
+        </div>
+      </div>
+      <div class="verdict warn" style="margin-top:14px">
+        <span class="vc-icon">&#9888;&#xFE0F;</span>
+        <span>Aplicando pelo menos <b>${BRL(minMensal)}/mês</b> em PGBL, o valor que seria pago de IR vira investimento no seu nome. Abaixo desse valor, parte do imposto é paga sem necessidade.</span>
+      </div>`;
+  } else {
+    document.getElementById('report-minimo-content').innerHTML = `
+      <div class="verdict green">
+        <span class="vc-icon">&#10003;</span>
+        <span>Seu resultado já é restituição mesmo sem PGBL. Qualquer aporte adicional em PGBL <b>aumenta ainda mais</b> sua restituição.</span>
+      </div>`;
+  }
+}
+
+// ── Calculadora interativa ──────────────────────────────────────────────────
+function renderCalculadora(st) {
+  const slider = document.getElementById('calcSlider');
+  const inputMensal = document.getElementById('calcPgblMensal');
+  const inputExtra  = document.getElementById('calcPgblExtra');
+  const resultDiv   = document.getElementById('calc-result');
+
+  slider.max = Math.round(st.pgblMaxAnual);
+  document.getElementById('calcSliderMax').textContent = `Teto: ${BRL(st.pgblMaxAnual)}`;
+
+  // Set initial value to current PGBL
+  const initialVal = Math.min(st.prevAnualAtual, st.pgblMaxAnual);
+  slider.value = Math.round(initialVal);
+  const initMensal = Math.round(initialVal / 12 * 100) / 100;
+  inputMensal.value = initMensal.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  function recalc(source) {
+    let pgblTotal;
+    if (source === 'slider') {
+      pgblTotal = parseFloat(slider.value);
+      const m = pgblTotal / 12;
+      inputMensal.value = m.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      inputExtra.value = '';
+    } else {
+      const mensal = parseVal(inputMensal.value);
+      const extra  = parseVal(inputExtra.value);
+      pgblTotal = Math.min(mensal * 12 + extra, st.pgblMaxAnual);
+      slider.value = Math.round(pgblTotal);
+    }
+
+    // Labels
+    document.getElementById('calcSliderLabel').textContent = BRL(pgblTotal);
+    const pct12 = st.pgblMaxAnual > 0 ? (pgblTotal / st.pgblMaxAnual * 100) : 0;
+    document.getElementById('calcSliderPct').textContent = pct12.toFixed(0) + '% dos 12%';
+
+    const sim = simulaPGBL(st, pgblTotal);
+    const semPgbl = simulaPGBL(st, 0);
+    const diff = semPgbl.resultFinal - sim.resultFinal;
+
+    resultDiv.innerHTML = `
+      <div class="calc-result-grid">
+        <div class="calc-item ci-accent">
+          <div class="ci-label">Aporte PGBL</div>
+          <div class="ci-value">${BRL(pgblTotal)}</div>
+          <div class="ci-sub">${BRL(pgblTotal / 12)}/mês</div>
+        </div>
+        <div class="calc-item">
+          <div class="ci-label">Imposto Apurado</div>
+          <div class="ci-value">${BRL(sim.impostoFinal)}</div>
+          <div class="ci-sub">Modelo ${sim.melhor}</div>
+        </div>
+        <div class="calc-item ${sim.resultFinal < 0 ? 'ci-green' : sim.resultFinal > 0 ? 'ci-red' : ''}">
+          <div class="ci-label">${sim.resultFinal < 0 ? 'Restituição' : sim.resultFinal > 0 ? 'A Pagar' : 'Resultado'}</div>
+          <div class="ci-value">${BRL(Math.abs(sim.resultFinal))}</div>
+          <div class="ci-sub">Após descontar IRRF de ${BRL(st.irrfAnual)}</div>
+        </div>
+        <div class="calc-item ${diff > 0 ? 'ci-green' : ''}">
+          <div class="ci-label">Economia vs. Sem PGBL</div>
+          <div class="ci-value">${diff > 0 ? '+' : ''}${BRL(diff)}</div>
+          <div class="ci-sub">${diff > 0 ? 'Você ganha mais ou paga menos' : 'Sem diferença'}</div>
+        </div>
+      </div>
+      <div class="calc-vs">
+        Sem PGBL: ${semPgbl.resultFinal < 0 ? 'restituição de' : 'a pagar'} <b>${BRL(Math.abs(semPgbl.resultFinal))}</b>
+        &rarr; Com este aporte: ${sim.resultFinal < 0 ? 'restituição de' : 'a pagar'} <b>${BRL(Math.abs(sim.resultFinal))}</b>
+        &rarr; Diferença: <b>${diff > 0 ? '+' : ''}${BRL(diff)}</b>
+      </div>`;
+  }
+
+  slider.oninput = () => recalc('slider');
+  inputMensal.addEventListener('input', () => recalc('input'));
+  inputExtra.addEventListener('input', () => recalc('input'));
+
+  // Dispara cálculo inicial
+  recalc('slider');
 }
 
 function voltarForm() {
