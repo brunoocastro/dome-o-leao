@@ -82,7 +82,7 @@ export default function Simulador() {
     const tbody = document.getElementById('inssTooltipBody')
     if (!tbody) return
     if (detalhe.faixas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Informe o salario</td></tr>'
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Informe o salário</td></tr>'
       return
     }
     const BRL2 = (v: number) => v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -155,8 +155,8 @@ export default function Simulador() {
         const label = document.getElementById('rendaLabel')
         if (label) {
           label.textContent = (document.getElementById('t-anual') as HTMLInputElement)?.checked
-            ? 'Renda Tributavel Anual'
-            : 'Salario Bruto Mensal'
+            ? 'Renda Tributável Anual'
+            : 'Salário Bruto Mensal'
         }
       })
     })
@@ -178,8 +178,8 @@ export default function Simulador() {
         if (prevValorField) prevValorField.style.display = v !== 'nao' ? 'flex' : 'none'
         if (sporadicSection) sporadicSection.style.display = v !== 'nao' ? 'block' : 'none'
         if (prevHint) prevHint.textContent = v === 'vgbl'
-          ? 'VGBL nao e dedutivel do IRPF. Considere migrar para PGBL para aproveitar os 12% de deducao.'
-          : 'O PGBL permite deduzir ate 12% da renda bruta tributavel anual.'
+          ? 'VGBL não é dedutível do IRPF. Considere migrar para PGBL para aproveitar os 12% de dedução.'
+          : 'O PGBL permite deduzir até 12% da renda bruta tributável anual.'
       })
     })
 
@@ -266,7 +266,7 @@ export default function Simulador() {
     const minInfo = findAporteMinimo(st)
 
     if (minInfo.aporte > 0 && Math.abs(minInfo.aporte - st.pgblMaxAnual) > 100) {
-      const minCenario = { label: 'Aporte Minimo', tag: 'min', ...simulaPGBL(st, minInfo.aporte) }
+      const minCenario = { label: 'Aporte Mínimo', tag: 'min', ...simulaPGBL(st, minInfo.aporte) }
       let inserted = false
       for (let i = 0; i < cenarios.length; i++) {
         if (cenarios[i].pgblAnual > minInfo.aporte) {
@@ -291,7 +291,7 @@ export default function Simulador() {
       <div class="report-item featured">
         <div class="ri-label">Aporte Ideal (teto 12%)</div>
         <div class="ri-value text-green">${BRL(st.pgblMaxAnual)}<span style="font-size:13px;color:var(--muted)">/ano</span></div>
-        <div class="ri-sub">${BRL(idealMensal)}/mes</div>
+        <div class="ri-sub">${BRL(idealMensal)}/mês</div>
       </div>
       <div class="report-item featured">
         <div class="ri-label">Resultado com Aporte Ideal</div>
@@ -306,12 +306,12 @@ export default function Simulador() {
       <div class="report-item">
         <div class="ri-label">Economia de Imposto</div>
         <div class="ri-value text-green">${BRL(economiaIdeal)}</div>
-        <div class="ri-sub">Diferenca de imposto apurado com vs. sem PGBL</div>
+        <div class="ri-sub">Diferença de imposto apurado com vs. sem PGBL</div>
       </div>
     </div>
     ${teto.resultFinal < semPgbl.resultFinal ? `<div class="verdict green" style="margin-top:14px">
       <span class="vc-icon">&#128176;</span>
-      <span>Com o aporte ideal, ${teto.resultFinal < 0 ? `sua restituicao aumenta em <b>${BRL(Math.abs(teto.resultFinal - semPgbl.resultFinal))}</b>` : `voce paga <b>${BRL(semPgbl.resultFinal - teto.resultFinal)}</b> a menos de imposto`} e ainda constroi patrimonio na previdencia.</span>
+      <span>Com o aporte ideal, ${teto.resultFinal < 0 ? `sua restituição aumenta em <b>${BRL(Math.abs(teto.resultFinal - semPgbl.resultFinal))}</b>` : `você paga <b>${BRL(semPgbl.resultFinal - teto.resultFinal)}</b> a menos de imposto`} e ainda constrói patrimônio na previdência.</span>
     </div>` : ''}`
     }
 
@@ -344,25 +344,25 @@ export default function Simulador() {
         reportMinimoContent.innerHTML = `
       <div class="report-grid">
         <div class="report-item" style="border-color:var(--warn)">
-          <div class="ri-label">Aporte Minimo para Resultado Zero</div>
+          <div class="ri-label">Aporte Mínimo para Resultado Zero</div>
           <div class="ri-value" style="color:var(--warn)">${BRL(minInfo.aporte)}<span style="font-size:13px;color:var(--muted)">/ano</span></div>
-          <div class="ri-sub">${BRL(minMensal)}/mes</div>
+          <div class="ri-sub">${BRL(minMensal)}/mês</div>
         </div>
         <div class="report-item">
-          <div class="ri-label">Sem esse aporte, voce pagaria</div>
+          <div class="ri-label">Sem esse aporte, você pagaria</div>
           <div class="ri-value text-red">${BRL(Math.abs(semRes))}</div>
-          <div class="ri-sub">de imposto — dinheiro que vai para a Receita em vez do seu patrimonio</div>
+          <div class="ri-sub">de imposto — dinheiro que vai para a Receita em vez do seu patrimônio</div>
         </div>
       </div>
       <div class="verdict warn" style="margin-top:14px">
         <span class="vc-icon">&#9888;&#xFE0F;</span>
-        <span>Aplicando pelo menos <b>${BRL(minMensal)}/mes</b> em PGBL, o valor que seria pago de IR vira investimento no seu nome. Abaixo desse valor, parte do imposto e paga sem necessidade.</span>
+        <span>Aplicando pelo menos <b>${BRL(minMensal)}/mês</b> em PGBL, o valor que seria pago de IR vira investimento no seu nome. Abaixo desse valor, parte do imposto é paga sem necessidade.</span>
       </div>`
       } else {
         reportMinimoContent.innerHTML = `
       <div class="verdict green">
         <span class="vc-icon">&#10003;</span>
-        <span>Seu resultado ja e restituicao mesmo sem PGBL. Qualquer aporte adicional em PGBL <b>aumenta ainda mais</b> sua restituicao.</span>
+        <span>Seu resultado já é restituição mesmo sem PGBL. Qualquer aporte adicional em PGBL <b>aumenta ainda mais</b> sua restituição.</span>
       </div>`
       }
     }
@@ -416,7 +416,7 @@ export default function Simulador() {
         <div class="calc-item ci-accent">
           <div class="ci-label">Aporte PGBL</div>
           <div class="ci-value">${BRL(pgblTotal)}</div>
-          <div class="ci-sub">${BRL(pgblTotal / 12)}/mes</div>
+          <div class="ci-sub">${BRL(pgblTotal / 12)}/mês</div>
         </div>
         <div class="calc-item">
           <div class="ci-label">Imposto Apurado</div>
@@ -424,20 +424,20 @@ export default function Simulador() {
           <div class="ci-sub">Modelo ${sim.melhor}</div>
         </div>
         <div class="calc-item ${sim.resultFinal < 0 ? 'ci-green' : sim.resultFinal > 0 ? 'ci-red' : ''}">
-          <div class="ci-label">${sim.resultFinal < 0 ? 'Restituicao' : sim.resultFinal > 0 ? 'A Pagar' : 'Resultado'}</div>
+          <div class="ci-label">${sim.resultFinal < 0 ? 'Restituição' : sim.resultFinal > 0 ? 'A Pagar' : 'Resultado'}</div>
           <div class="ci-value">${BRL(Math.abs(sim.resultFinal))}</div>
-          <div class="ci-sub">Apos descontar IRRF de ${BRL(st.irrfAnual)}</div>
+          <div class="ci-sub">Após descontar IRRF de ${BRL(st.irrfAnual)}</div>
         </div>
         <div class="calc-item ${diff > 0 ? 'ci-green' : ''}">
           <div class="ci-label">Economia vs. Sem PGBL</div>
           <div class="ci-value">${diff > 0 ? '+' : ''}${BRL(diff)}</div>
-          <div class="ci-sub">${diff > 0 ? 'Voce ganha mais ou paga menos' : 'Sem diferenca'}</div>
+          <div class="ci-sub">${diff > 0 ? 'Você ganha mais ou paga menos' : 'Sem diferença'}</div>
         </div>
       </div>
       <div class="calc-vs">
-        Sem PGBL: ${semPgbl.resultFinal < 0 ? 'restituicao de' : 'a pagar'} <b>${BRL(Math.abs(semPgbl.resultFinal))}</b>
-        &rarr; Com este aporte: ${sim.resultFinal < 0 ? 'restituicao de' : 'a pagar'} <b>${BRL(Math.abs(sim.resultFinal))}</b>
-        &rarr; Diferenca: <b>${diff > 0 ? '+' : ''}${BRL(diff)}</b>
+        Sem PGBL: ${semPgbl.resultFinal < 0 ? 'restituição de' : 'a pagar'} <b>${BRL(Math.abs(semPgbl.resultFinal))}</b>
+        &rarr; Com este aporte: ${sim.resultFinal < 0 ? 'restituição de' : 'a pagar'} <b>${BRL(Math.abs(sim.resultFinal))}</b>
+        &rarr; Diferença: <b>${diff > 0 ? '+' : ''}${BRL(diff)}</b>
       </div>`
     }
 
@@ -604,15 +604,15 @@ export default function Simulador() {
 
     // Tabela Etapa 2
     const rows: Array<[string, number | null, number, string]> = [
-      ['Renda Bruta Tributavel', rendaMensal, rendaAnual, 'neutral'],
+      ['Renda Bruta Tributável', rendaMensal, rendaAnual, 'neutral'],
       ['(-) INSS', -inssMensal, -inssAnual, 'red'],
       ['(-) Dependentes (' + dependentes + ')', -deducaoDependentesM, -deducaoDependentesAnual, 'red'],
-      ['(-) Despesas Medicas', null, -despMedAnual, 'red'],
-      ['(-) Despesas de Educacao', null, -despEduAnual, 'red'],
-      ['(-) Pensao Alimenticia', -pensaoM, -pensaoAnual, 'red'],
+      ['(-) Despesas Médicas', null, -despMedAnual, 'red'],
+      ['(-) Despesas de Educação', null, -despEduAnual, 'red'],
+      ['(-) Pensão Alimentícia', -pensaoM, -pensaoAnual, 'red'],
       ...(prevAnualAtual > 0 ? [['(-) PGBL/FAPI (atual)', -prevMensalVal, -prevAnualAtual, 'red'] as [string, number, number, string]] : []),
-      ['= Base de Calculo (Completo)', null, baseCompleta, 'total'],
-      ['= Base de Calculo (Simplificado)', null, baseSimplificada, 'total'],
+      ['= Base de Cálculo (Completo)', null, baseCompleta, 'total'],
+      ['= Base de Cálculo (Simplificado)', null, baseSimplificada, 'total'],
       ['Imposto Apurado (Completo)', null, impostoCompleto, 'warn'],
       ['Imposto Apurado (Simplificado)', null, impostoSimplificado, 'warn'],
       ['(-) IRRF Pago na Fonte', null, -irrfAnual, 'green'],
@@ -654,22 +654,22 @@ export default function Simulador() {
     if (compareGrid) {
       compareGrid.innerHTML = `
     <div class="compare-card ${cRec === 'completo' ? 'recommended' : ''}">
-      <h4>Deducoes Legais ${cRec === 'completo' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
-      <div class="compare-row"><span>Deducoes Detalhadas</span><span class="cv text-green">${BRL(totalDeducoesAnual)}</span></div>
-      <div class="compare-row"><span>Base de Calculo</span><span class="cv">${BRL(baseCompleta)}</span></div>
+      <h4>Deduções Legais ${cRec === 'completo' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
+      <div class="compare-row"><span>Deduções Detalhadas</span><span class="cv text-green">${BRL(totalDeducoesAnual)}</span></div>
+      <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseCompleta)}</span></div>
       <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoCompleto)}</span></div>
       <div class="compare-row"><span>(-) IRRF Pago</span><span class="cv">${BRL(irrfAnual)}</span></div>
       <div class="compare-row"><span><b>Resultado</b></span>${resTag(resultadoCompleto)}</div>
-      <div class="compare-row"><span>Aliquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoCompleto / rendaAnual * 100 : 0)}</span></div>
+      <div class="compare-row"><span>Alíquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoCompleto / rendaAnual * 100 : 0)}</span></div>
     </div>
     <div class="compare-card ${cRec === 'simplificado' ? 'recommended' : ''}">
       <h4>Desconto Simplificado ${cRec === 'simplificado' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
       <div class="compare-row"><span>Desconto Fixo (20%)</span><span class="cv text-green">${BRL(descontoSimp)}</span></div>
-      <div class="compare-row"><span>Base de Calculo</span><span class="cv">${BRL(baseSimplificada)}</span></div>
+      <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseSimplificada)}</span></div>
       <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoSimplificado)}</span></div>
       <div class="compare-row"><span>(-) IRRF Pago</span><span class="cv">${BRL(irrfAnual)}</span></div>
       <div class="compare-row"><span><b>Resultado</b></span>${resTag(resultadoSimplificado)}</div>
-      <div class="compare-row"><span>Aliquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoSimplificado / rendaAnual * 100 : 0)}</span></div>
+      <div class="compare-row"><span>Alíquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoSimplificado / rendaAnual * 100 : 0)}</span></div>
     </div>`
     }
 
@@ -678,10 +678,10 @@ export default function Simulador() {
       ['Renda Bruta Anual', BRL(rendaAnual), 'neutral'],
       ['Teto PGBL/FAPI (12%)', BRL(pgblMaxAnual), 'accent'],
       ['Aporte Mensal Fixo (anual)', BRL(prevMensalVal * 12), 'neutral'],
-      ['Aportes Esporadicos', BRL(sporadicTotal), sporadicTotal > 0 ? 'neutral' : 'muted'],
+      ['Aportes Esporádicos', BRL(sporadicTotal), sporadicTotal > 0 ? 'neutral' : 'muted'],
       ['Total PGBL Atual (anual)', BRL(prevAnualAtual), prevAnualAtual > 0 ? 'neutral' : 'muted'],
-      ['Aporte Adicional Necessario (anual)', BRL(pgblFaltante), pgblFaltante > 0 ? 'warn' : 'green'],
-      ['Aporte Adicional Necessario (mensal)', BRL(pgblFaltanteM), pgblFaltante > 0 ? 'warn' : 'green'],
+      ['Aporte Adicional Necessário (anual)', BRL(pgblFaltante), pgblFaltante > 0 ? 'warn' : 'green'],
+      ['Aporte Adicional Necessário (mensal)', BRL(pgblFaltanteM), pgblFaltante > 0 ? 'warn' : 'green'],
       ['Imposto sem PGBL', BRL(impostoSemPGBL), 'red'],
       ['Imposto com PGBL no teto', BRL(impostoComPGBL), 'green'],
       ['Economia de IR com PGBL (anual)', BRL(economiaPGBL), 'highlight'],
@@ -728,17 +728,17 @@ export default function Simulador() {
     // Veredicto
     let verdictHtml = ''
     if (aliqEfetiva === 0) {
-      verdictHtml = `<div class="verdict green"><span class="vc-icon">&#127881;</span><span>Voce esta na faixa de <b>isencao</b> pelo mecanismo de Redutor 2026. Nenhum imposto e devido.</span></div>`
+      verdictHtml = `<div class="verdict green"><span class="vc-icon">&#127881;</span><span>Você está na faixa de <b>isenção</b> pelo mecanismo de Redutor 2026. Nenhum imposto é devido.</span></div>`
     } else if (melhorModelo === 'completo' && economiaPGBL > 200) {
       verdictHtml = `
-      <div class="verdict green"><span class="vc-icon">&#9989;</span><span>Use a <b>Declaracao Completa</b> — suas deducoes superam o desconto simplificado.</span></div>
-      <div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Investindo mais <b>${BRL(pgblFaltante)}/ano</b> em PGBL, voce economiza <b>${BRL(economiaPGBL)}</b> de imposto.</span></div>`
+      <div class="verdict green"><span class="vc-icon">&#9989;</span><span>Use a <b>Declaração Completa</b> — suas deduções superam o desconto simplificado.</span></div>
+      <div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Investindo mais <b>${BRL(pgblFaltante)}/ano</b> em PGBL, você economiza <b>${BRL(economiaPGBL)}</b> de imposto.</span></div>`
     } else if (melhorModelo === 'simplificado') {
       verdictHtml = `
-      <div class="verdict warn"><span class="vc-icon">&#128203;</span><span>O <b>Desconto Simplificado</b> e mais vantajoso para seu perfil — deducoes abaixo de 20% da renda.</span></div>
+      <div class="verdict warn"><span class="vc-icon">&#128203;</span><span>O <b>Desconto Simplificado</b> é mais vantajoso para seu perfil — deduções abaixo de 20% da renda.</span></div>
       ${economiaPGBL > 100 ? `<div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Ainda assim, aportar em PGBL pode gerar economia de <b>${BRL(economiaPGBL)}</b> ao ano.</span></div>` : ''}`
     } else {
-      verdictHtml = `<div class="verdict blue"><span class="vc-icon">&#8505;&#65039;</span><span>Use a <b>Declaracao Completa</b>. Considere elevar aportes em PGBL para maximizar deducoes.</span></div>`
+      verdictHtml = `<div class="verdict blue"><span class="vc-icon">&#8505;&#65039;</span><span>Use a <b>Declaração Completa</b>. Considere elevar aportes em PGBL para maximizar deduções.</span></div>`
     }
     const verdictBox = document.getElementById('verdict-box')
     if (verdictBox) verdictBox.innerHTML = verdictHtml
@@ -795,9 +795,9 @@ export default function Simulador() {
 
       {/* Header */}
       <header>
-        <div className="badge">Ano-calendario 2026</div>
-        <h1><span>Dome o Leao</span><br />Simulador IRPF 2026</h1>
-        <p>O leao do Imposto de Renda so ruge pra quem nao tem os numeros certos. Descubra quanto pagar, quanto receber e onde investir pra ele ficar mansinho.<br />
+        <div className="badge">Ano-calendário 2026</div>
+        <h1><span>Dome o Leão</span><br />Simulador IRPF 2026</h1>
+        <p>O leão do Imposto de Renda só ruge pra quem não tem os números certos. Descubra quanto pagar, quanto receber e onde investir pra ele ficar mansinho.<br />
         <span style={{ fontSize: '11px', opacity: 0.6 }}>Valores oficiais: Lei 15.191/2025 (tabela) + Lei 15.270/2025 (redutor e desc. simplificado)</span></p>
       </header>
 
@@ -805,15 +805,15 @@ export default function Simulador() {
       <div className="steps">
         <div className="step-item active" id="step-nav-1">
           <div className="step-num">1</div>
-          <div><b>Dados</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>Renda e Deducoes</small></div>
+          <div><b>Dados</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>Renda e Deduções</small></div>
         </div>
         <div className="step-item" id="step-nav-2">
           <div className="step-num">2</div>
-          <div><b>Calculo</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>Imposto Devido</small></div>
+          <div><b>Cálculo</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>Imposto Devido</small></div>
         </div>
         <div className="step-item" id="step-nav-3">
           <div className="step-num">3</div>
-          <div><b>Estrategia</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>FAPI / PGBL</small></div>
+          <div><b>Estratégia</b><br /><small style={{ fontSize: '11px', color: 'inherit', opacity: 0.7 }}>FAPI / PGBL</small></div>
         </div>
       </div>
 
@@ -837,24 +837,24 @@ export default function Simulador() {
               </div>
             </div>
             <div className="field">
-              <label id="rendaLabel">Salario Bruto Mensal</label>
-              <small>Inclua pro-labore. Exclua 13o e PLR.</small>
+              <label id="rendaLabel">Salário Bruto Mensal</label>
+              <small>Inclua pró-labore. Exclua 13º e PLR.</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="rendaPrincipal" placeholder="0,00" />
               </div>
             </div>
             <div className="field">
-              <label>Outras Rendas Tributaveis (mensal)</label>
-              <small>Aluguel, autonomo, etc.</small>
+              <label>Outras Rendas Tributáveis (mensal)</label>
+              <small>Aluguel, autônomo, etc.</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="outrasRendas" placeholder="0,00" />
               </div>
             </div>
             <div className="field">
-              <label>13o Salario (anual)</label>
-              <small>Tributacao exclusiva — informativo.</small>
+              <label>13º Salário (anual)</label>
+              <small>Tributação exclusiva — informativo.</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="decimoTerceiro" placeholder="0,00" />
@@ -892,7 +892,7 @@ export default function Simulador() {
               </div>
             </div>
             <div className="hint-box" style={{ marginTop: '8px' }}>
-              O IRRF e o imposto que a empresa ja desconta do seu salario todo mes. Na declaracao, ele e subtraido do imposto apurado: se voce pagou mais do que deve, recebe restituicao.
+              O IRRF é o imposto que a empresa já desconta do seu salário todo mês. Na declaração, ele é subtraído do imposto apurado: se você pagou mais do que deve, recebe restituição.
             </div>
           </div>
         </div>
@@ -900,13 +900,13 @@ export default function Simulador() {
         {/* Bloco B: Deducoes */}
         <div className="card">
           <div className="card-title">
-            <span className="icon">&#128315;</span> Bloco B — Deducoes
+            <span className="icon">&#128315;</span> Bloco B — Deduções
             <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" className="ref-link"><span className="ref-icon">&#8599;</span>Receita Federal</a>
           </div>
           <div className="field-grid">
             <div className="field">
-              <label>Numero de Dependentes</label>
-              <small>R$ 189,59/mes por dependente</small>
+              <label>Número de Dependentes</label>
+              <small>R$ 189,59/mês por dependente</small>
               <input type="number" id="dependentes" placeholder="0" min={0} max={20} />
             </div>
             <div className="field">
@@ -927,17 +927,17 @@ export default function Simulador() {
             </div>
             <div className="field" id="inssAutoPreview">
               <label>INSS Calculado <a href="https://www.contabilizei.com.br/contabilidade-online/tabela-inss/" target="_blank" rel="noopener" className="ref-link"><span className="ref-icon">&#8599;</span>Tabela INSS</a></label>
-              <small>Baseado no salario bruto e vinculo</small>
+              <small>Baseado no salário bruto e vínculo</small>
               <div className="inss-computed">
                 <span className="inss-val" id="inssComputedVal">R$ 0,00</span>
                 <span className="inss-computed-sub" id="inssComputedAnual">Anual: R$ 0,00</span>
                 <div className="inss-help-wrap">
                   <div className="inss-help-btn">?</div>
                   <div className="inss-tooltip" id="inssTooltip">
-                    <h4>Calculo Progressivo do INSS</h4>
+                    <h4>Cálculo Progressivo do INSS</h4>
                     <table>
                       <thead>
-                        <tr><th>Faixa</th><th>Aliquota</th><th>Base</th><th>Contrib.</th></tr>
+                        <tr><th>Faixa</th><th>Alíquota</th><th>Base</th><th>Contrib.</th></tr>
                       </thead>
                       <tbody id="inssTooltipBody"></tbody>
                     </table>
@@ -946,24 +946,24 @@ export default function Simulador() {
               </div>
             </div>
             <div className="field">
-              <label>Vinculo Empregaticio</label>
+              <label>Vínculo Empregatício</label>
               <select id="vinculo">
                 <option value="clt">CLT (RGPS)</option>
-                <option value="servidor">Servidor Publico (RPPS)</option>
-                <option value="autonomo">Autonomo (RGPS)</option>
-                <option value="socio">Socio / Pro-labore</option>
+                <option value="servidor">Servidor Público (RPPS)</option>
+                <option value="autonomo">Autônomo (RGPS)</option>
+                <option value="socio">Sócio / Pró-labore</option>
               </select>
             </div>
             <div className="field">
-              <label>Despesas Medicas (anual)</label>
-              <small>Plano de saude, consultas, cirurgias — sem limite</small>
+              <label>Despesas Médicas (anual)</label>
+              <small>Plano de saúde, consultas, cirurgias — sem limite</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="despMedicas" placeholder="0,00" />
               </div>
             </div>
             <div className="field">
-              <label>Despesas de Educacao (anual)</label>
+              <label>Despesas de Educação (anual)</label>
               <small>Faculdade, escola — limite R$ 3.561,50/pessoa</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
@@ -971,7 +971,7 @@ export default function Simulador() {
               </div>
             </div>
             <div className="field">
-              <label>Pensao Alimenticia (mensal)</label>
+              <label>Pensão Alimentícia (mensal)</label>
               <small>Apenas judicial — sem limite</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
@@ -984,15 +984,15 @@ export default function Simulador() {
         {/* Bloco C: Previdencia */}
         <div className="card">
           <div className="card-title">
-            <span className="icon">&#127974;</span> Bloco C — Previdencia Complementar
+            <span className="icon">&#127974;</span> Bloco C — Previdência Complementar
             <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener" className="ref-link"><span className="ref-icon">&#8599;</span>Limite 12%</a>
           </div>
           <div className="field-grid">
             <div className="field">
-              <label>Possui Previdencia Complementar?</label>
+              <label>Possui Previdência Complementar?</label>
               <div className="toggle-group">
                 <input type="radio" name="prevType" id="prev-nao" value="nao" defaultChecked />
-                <label htmlFor="prev-nao">Nao possuo</label>
+                <label htmlFor="prev-nao">Não possuo</label>
                 <input type="radio" name="prevType" id="prev-pgbl" value="pgbl" />
                 <label htmlFor="prev-pgbl">PGBL</label>
                 <input type="radio" name="prevType" id="prev-vgbl" value="vgbl" />
@@ -1000,8 +1000,8 @@ export default function Simulador() {
               </div>
             </div>
             <div className="field" id="prevValorField" style={{ display: 'none' }}>
-              <label>Aplicacao Mensal Fixa</label>
-              <small>Valor debitado todo mes automaticamente</small>
+              <label>Aplicação Mensal Fixa</label>
+              <small>Valor debitado todo mês automaticamente</small>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="prevMensal" placeholder="0,00" />
@@ -1011,16 +1011,16 @@ export default function Simulador() {
 
           {/* Aportes esporadicos */}
           <div id="sporadicSection" style={{ display: 'none', marginTop: '16px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' as const, letterSpacing: '.05em' }}>Aplicacoes Esporadicas</label>
-            <small style={{ display: 'block', fontSize: '11px', color: 'var(--muted)', opacity: 0.7, margin: '4px 0 8px' }}>Aportes extras feitos ao longo do ano (ex: bonus, sobra de caixa)</small>
+            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' as const, letterSpacing: '.05em' }}>Aplicações Esporádicas</label>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--muted)', opacity: 0.7, margin: '4px 0 8px' }}>Aportes extras feitos ao longo do ano (ex: bônus, sobra de caixa)</small>
             <div className="sporadic-list" id="sporadicList"></div>
             <div className="add-sporadic-row">
               <div className="field">
-                <label>Mes</label>
+                <label>Mês</label>
                 <select id="sporadicMonth">
                   <option value="Jan">Janeiro</option>
                   <option value="Fev">Fevereiro</option>
-                  <option value="Mar">Marco</option>
+                  <option value="Mar">Março</option>
                   <option value="Abr">Abril</option>
                   <option value="Mai">Maio</option>
                   <option value="Jun">Junho</option>
@@ -1042,13 +1042,13 @@ export default function Simulador() {
               <button className="btn-sm" type="button" onClick={() => addSporadic()}>+ Adicionar</button>
             </div>
             <div className="sporadic-total" id="sporadicTotal" style={{ display: 'none' }}>
-              <span>Total de aportes esporadicos no ano</span>
+              <span>Total de aportes esporádicos no ano</span>
               <span className="st-val" id="sporadicTotalVal">R$ 0,00</span>
             </div>
           </div>
 
           <div className="hint-box" id="prevHint" style={{ marginTop: '14px' }}>
-            O PGBL permite deduzir ate 12% da renda bruta tributavel. O VGBL nao e dedutivel do IR — mas pode fazer parte da estrategia patrimonial.
+            O PGBL permite deduzir até 12% da renda bruta tributável. O VGBL não é dedutível do IR — mas pode fazer parte da estratégia patrimonial.
           </div>
         </div>
 
@@ -1062,8 +1062,8 @@ export default function Simulador() {
       <div id="results" style={{ display: showResults ? 'block' : 'none' }}>
 
         <div className="result-header">
-          <h2>Resultado da Simulacao</h2>
-          <p id="result-subtitle">Ano-calendario 2026 — Declaracao 2027</p>
+          <h2>Resultado da Simulação</h2>
+          <p id="result-subtitle">Ano-calendário 2026 — Declaração 2027</p>
         </div>
 
         {/* Resultado principal */}
@@ -1080,7 +1080,7 @@ export default function Simulador() {
             <div className="kpi-value" id="kpi-renda">&mdash;</div>
           </div>
           <div className="kpi">
-            <div className="kpi-label">Base de Calculo</div>
+            <div className="kpi-label">Base de Cálculo</div>
             <div className="kpi-value" id="kpi-base">&mdash;</div>
           </div>
           <div className="kpi warn">
@@ -1088,11 +1088,11 @@ export default function Simulador() {
             <div className="kpi-value" id="kpi-imposto">&mdash;</div>
           </div>
           <div className="kpi" id="kpi-irrf-box">
-            <div className="kpi-label">IRRF Ja Pago</div>
+            <div className="kpi-label">IRRF Já Pago</div>
             <div className="kpi-value" id="kpi-irrf">&mdash;</div>
           </div>
           <div className="kpi highlight">
-            <div className="kpi-label">Aliquota Efetiva</div>
+            <div className="kpi-label">Alíquota Efetiva</div>
             <div className="kpi-value" id="kpi-aliquota">&mdash;</div>
           </div>
         </div>
@@ -1100,7 +1100,7 @@ export default function Simulador() {
         {/* Aliquota bar */}
         <div className="bar-wrap card" style={{ padding: '18px 24px' }}>
           <div className="bar-label">
-            <span>Aliquota Efetiva</span>
+            <span>Alíquota Efetiva</span>
             <span id="bar-pct">0%</span>
           </div>
           <div className="bar-track">
@@ -1113,7 +1113,7 @@ export default function Simulador() {
         </div>
 
         {/* Etapa 2: Tabela detalhada */}
-        <div className="section-title">Etapa 2 — Detalhamento do Calculo</div>
+        <div className="section-title">Etapa 2 — Detalhamento do Cálculo</div>
         <div className="card">
           <div className="table-wrap">
             <table>
@@ -1130,14 +1130,14 @@ export default function Simulador() {
         </div>
 
         {/* Modelo Simplificado vs Completo */}
-        <div className="section-title">Comparativo — Modelo de Declaracao</div>
+        <div className="section-title">Comparativo — Modelo de Declaração</div>
         <div className="compare-grid" id="compare-grid"></div>
 
         {/* Etapa 3: Estrategia FAPI/PGBL */}
-        <div className="section-title">Etapa 3 — Estrategia FAPI / PGBL</div>
+        <div className="section-title">Etapa 3 — Estratégia FAPI / PGBL</div>
 
         <div className="strategy-box">
-          <h3>&#127919;&#xFE0F; Aporte Ideal em Previdencia Complementar</h3>
+          <h3>&#127919;&#xFE0F; Aporte Ideal em Previdência Complementar</h3>
           <div id="strategy-rows"></div>
         </div>
 
@@ -1148,10 +1148,10 @@ export default function Simulador() {
             <table>
               <thead>
                 <tr>
-                  <th>Cenario</th>
-                  <th className="text-right">Base de Calculo</th>
+                  <th>Cenário</th>
+                  <th className="text-right">Base de Cálculo</th>
                   <th className="text-right">Imposto</th>
-                  <th className="text-right">Aliquota Efetiva</th>
+                  <th className="text-right">Alíquota Efetiva</th>
                 </tr>
               </thead>
               <tbody id="tbl-cenarios"></tbody>
@@ -1163,19 +1163,19 @@ export default function Simulador() {
         <div id="verdict-box"></div>
 
         {/* Relatorio Completo PGBL */}
-        <div className="section-title">Relatorio — Aporte Ideal PGBL/FAPI</div>
+        <div className="section-title">Relatório — Aporte Ideal PGBL/FAPI</div>
 
         {/* Resumo do aporte ideal */}
         <div className="card" id="report-ideal">
-          <div className="card-title"><span className="icon">&#127919;</span> Aporte Ideal para Maxima Restituicao</div>
+          <div className="card-title"><span className="icon">&#127919;</span> Aporte Ideal para Máxima Restituição</div>
           <div id="report-ideal-content"></div>
         </div>
 
         {/* Grafico comparativo */}
         <div className="card" id="report-chart-card">
-          <div className="card-title"><span className="icon">&#128202;</span> Comparativo — Resultado por Nivel de Aporte PGBL</div>
+          <div className="card-title"><span className="icon">&#128202;</span> Comparativo — Resultado por Nível de Aporte PGBL</div>
           <div className="chart-legend">
-            <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--primary)' }}></span>Restituicao</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--primary)' }}></span>Restituição</span>
             <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--danger)' }}></span>A pagar</span>
             <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--accent)' }}></span>Aporte PGBL</span>
           </div>
@@ -1184,7 +1184,7 @@ export default function Simulador() {
 
         {/* Aporte minimo */}
         <div className="card" id="report-minimo">
-          <div className="card-title"><span className="icon">&#9888;&#xFE0F;</span> Aporte Minimo — Nao &quot;Perder Dinheiro&quot;</div>
+          <div className="card-title"><span className="icon">&#9888;&#xFE0F;</span> Aporte Mínimo — Não &quot;Perder Dinheiro&quot;</div>
           <div id="report-minimo-content"></div>
         </div>
 
@@ -1201,7 +1201,7 @@ export default function Simulador() {
               </div>
             </div>
             <div className="field">
-              <label>Aporte Extra Anual (esporadico)</label>
+              <label>Aporte Extra Anual (esporádico)</label>
               <div className="input-wrap">
                 <span className="prefix">R$</span>
                 <input type="text" className="currency" id="calcPgblExtra" placeholder="0,00" />
@@ -1233,24 +1233,24 @@ export default function Simulador() {
         )}
 
         <div className="notice">
-          &#9888; Simulacao baseada nas regras oficiais para o ano-calendario 2026, incluindo o Redutor de Imposto (Lei 15.270/2025) para isencao ate R$&nbsp;5.000/mes com reducao gradual ate R$&nbsp;7.350/mes. Consulte um contador para planejamento definitivo.
+          &#9888; Simulação baseada nas regras oficiais para o ano-calendário 2026, incluindo o Redutor de Imposto (Lei 15.270/2025) para isenção até R$&nbsp;5.000/mes com redução gradual até R$&nbsp;7.350/mes. Consulte um contador para planejamento definitivo.
         </div>
 
         {/* Fontes oficiais */}
         <div className="card refs-footer">
           <h4>Fontes Oficiais</h4>
           <ul>
-            <li><span className="ref-tag">1</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener">Receita Federal — Tabelas IRPF 2026 (faixas, aliquotas, deducoes)</a></li>
-            <li><span className="ref-tag">2</span><a href="https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/01/nova-tabela-do-ir-veja-faixas-e-aliquotas-e-saiba-mais-sobre-medida-que-isenta-o-pagamento-para-quem-ganha-ate-r-5-mil" target="_blank" rel="noopener">Gov.br — Nova Tabela IR: faixas, aliquotas e isencao ate R$ 5 mil</a></li>
-            <li><span className="ref-tag">3</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-191-2025" target="_blank" rel="noopener">Receita Federal — Exemplos de aplicacao da Lei 15.270/2025 (redutor)</a></li>
-            <li><span className="ref-tag">4</span><a href="https://www.contabilizei.com.br/contabilidade-online/tabela-inss/" target="_blank" rel="noopener">Tabela INSS 2026 — Aliquotas progressivas e teto (R$ 8.475,55)</a></li>
+            <li><span className="ref-tag">1</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener">Receita Federal — Tabelas IRPF 2026 (faixas, alíquotas, deduções)</a></li>
+            <li><span className="ref-tag">2</span><a href="https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/01/nova-tabela-do-ir-veja-faixas-e-aliquotas-e-saiba-mais-sobre-medida-que-isenta-o-pagamento-para-quem-ganha-ate-r-5-mil" target="_blank" rel="noopener">Gov.br — Nova Tabela IR: faixas, alíquotas e isenção até R$ 5 mil</a></li>
+            <li><span className="ref-tag">3</span><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-191-2025" target="_blank" rel="noopener">Receita Federal — Exemplos de aplicação da Lei 15.270/2025 (redutor)</a></li>
+            <li><span className="ref-tag">4</span><a href="https://www.contabilizei.com.br/contabilidade-online/tabela-inss/" target="_blank" rel="noopener">Tabela INSS 2026 — Alíquotas progressivas e teto (R$ 8.475,55)</a></li>
             <li><span className="ref-tag">5</span><a href="https://www.sager.adv.br/novo-limite-desconto-simplificado-irpf-2026/" target="_blank" rel="noopener">Lei 15.270/2025 — Desconto simplificado: novo teto R$ 17.640,00</a></li>
           </ul>
         </div>
 
         <div className="actions" style={{ marginTop: '24px' }}>
           <button className="btn btn-outline" onClick={() => voltarForm()}>&#8592; Editar Dados</button>
-          <button className="btn btn-primary" onClick={() => window.print()}>&#128438; Imprimir</button>
+          <button className="btn btn-outline" onClick={() => window.print()}>Imprimir</button>
         </div>
       </div>
 

@@ -91,8 +91,8 @@ export default function ComparativoInvestimentos({
 
   const chartData = projecoes.map(p => ({
     ano: p.ano,
-    'PGBL Teto (liquido + beneficio IR)': Math.round(p.pgblTotalReal),
-    'Min PGBL + Alternativo (liquido)': Math.round(p.mixTotalReal),
+    'PGBL Teto (líquido + benefício IR)': Math.round(p.pgblTotalReal),
+    'Min PGBL + Alternativo (líquido)': Math.round(p.mixTotalReal),
   }))
 
   // ── Table filter ────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ export default function ComparativoInvestimentos({
       {/* ── Input card ────────────────────────────────────────────────────── */}
       <div className="card">
         <div className="card-title">
-          <span className="icon">📊</span> Parametros da Simulacao
+          <span className="icon">📊</span> Parâmetros da Simulação
         </div>
 
         <div className="field-grid">
@@ -150,7 +150,7 @@ export default function ComparativoInvestimentos({
           {/* Aporte mensal */}
           <div className="field">
             <label>Aporte Mensal PGBL (teto)</label>
-            <small>Valor considerado para cenario PGBL maximo</small>
+            <small>Valor considerado para cenário PGBL máximo</small>
             <div className="input-wrap">
               <span className="prefix">R$</span>
               <input
@@ -166,7 +166,7 @@ export default function ComparativoInvestimentos({
           {/* Saldo atual */}
           <div className="field">
             <label>Saldo Atual no PGBL/FAPI</label>
-            <small>Valor ja acumulado na previdencia</small>
+            <small>Valor já acumulado na previdência</small>
             <div className="input-wrap">
               <span className="prefix">R$</span>
               <input
@@ -197,7 +197,7 @@ export default function ComparativoInvestimentos({
 
           {/* Tabela PGBL */}
           <div className="field">
-            <label>Tabela de Tributacao PGBL</label>
+            <label>Tabela de Tributação PGBL</label>
             <div className="toggle-group">
               <input
                 type="radio"
@@ -268,7 +268,7 @@ export default function ComparativoInvestimentos({
 
         {/* PGBL regressive table hint */}
         <div className="hint-box" style={{ marginTop: 14 }}>
-          Tabela Regressiva PGBL: 35% (ate 2 anos) → 30% (2-4) → 25% (4-6) →
+          Tabela Regressiva PGBL: 35% (até 2 anos) → 30% (2-4) → 25% (4-6) →
           20% (6-8) → 15% (8-10) →{' '}
           <strong>10% (acima de 10 anos)</strong>
         </div>
@@ -278,17 +278,17 @@ export default function ComparativoInvestimentos({
       {ultimo && (
         <div className="kpi-grid" style={{ marginTop: 16 }}>
           <div className={`kpi ${vencedor === 'pgbl' ? 'highlight' : ''}`}>
-            <div className="kpi-label">PGBL Teto — Liquido Final</div>
+            <div className="kpi-label">PGBL Teto — Líquido Final</div>
             <div className="kpi-value">{BRL(ultimo.pgblTotalReal)}</div>
           </div>
           <div className={`kpi ${vencedor === 'mix' ? 'highlight' : ''}`}>
             <div className="kpi-label">
-              Min PGBL + {nomeAlternativo} — Liquido
+              Min PGBL + {nomeAlternativo} — Líquido
             </div>
             <div className="kpi-value">{BRL(ultimo.mixTotalReal)}</div>
           </div>
           <div className="kpi accent">
-            <div className="kpi-label">Diferenca em {horizonte} anos</div>
+            <div className="kpi-label">Diferença em {horizonte} anos</div>
             <div className="kpi-value">{BRL(diferenca)}</div>
           </div>
         </div>
@@ -298,8 +298,8 @@ export default function ComparativoInvestimentos({
       {chartData.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>
           <div className="card-title">
-            <span className="icon">📈</span> Evolucao Patrimonial — Liquido
-            apos Impostos
+            <span className="icon">📈</span> Evolução Patrimonial — Líquido
+            após Impostos
           </div>
           <div className="inv-chart-wrap">
             <ResponsiveContainer width="100%" height={350}>
@@ -352,14 +352,14 @@ export default function ComparativoInvestimentos({
                 />
                 <Area
                   type="monotone"
-                  dataKey="PGBL Teto (liquido + beneficio IR)"
+                  dataKey="PGBL Teto (líquido + benefício IR)"
                   stroke="#2ea043"
                   fill="url(#gradPGBL)"
                   strokeWidth={2}
                 />
                 <Area
                   type="monotone"
-                  dataKey="Min PGBL + Alternativo (liquido)"
+                  dataKey="Min PGBL + Alternativo (líquido)"
                   stroke="#58a6ff"
                   fill="url(#gradAlt)"
                   strokeWidth={2}
@@ -374,18 +374,18 @@ export default function ComparativoInvestimentos({
       {tabelaFiltrada.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>
           <div className="card-title">
-            <span className="icon">📋</span> Projecao Ano a Ano
+            <span className="icon">📋</span> Projeção Ano a Ano
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Ano</th>
-                  <th className="text-right">Aliq. PGBL</th>
+                  <th className="text-right">Alíq. PGBL</th>
                   <th className="text-right">PGBL Teto Liq.</th>
-                  <th className="text-right">+ Beneficio IR</th>
+                  <th className="text-right">+ Benefício IR</th>
                   <th className="text-right">Total PGBL</th>
-                  <th className="text-right">Mix Liquido</th>
+                  <th className="text-right">Mix Líquido</th>
                   <th className="text-right">Vencedor</th>
                 </tr>
               </thead>
@@ -441,21 +441,21 @@ export default function ComparativoInvestimentos({
               <>
                 Em <b>{horizonte} anos</b>, investir o{' '}
                 <b>teto do PGBL</b> rende <b>{BRL(diferenca)}</b> a mais
-                que a estrategia mista, considerando o beneficio fiscal +
-                rendimento. O PGBL vence pela deducao de IR + aliquota
-                regressiva de {PCT(ultimo.pgblAliqResgate * 100)} apos{' '}
+                que a estratégia mista, considerando o benefício fiscal +
+                rendimento. O PGBL vence pela dedução de IR + alíquota
+                regressiva de {PCT(ultimo.pgblAliqResgate * 100)} após{' '}
                 {horizonte} anos.
               </>
             ) : (
               <>
-                Em <b>{horizonte} anos</b>, a estrategia de{' '}
+                Em <b>{horizonte} anos</b>, a estratégia de{' '}
                 <b>
-                  minimo PGBL + {nomeAlternativo}
+                  mínimo PGBL + {nomeAlternativo}
                 </b>{' '}
                 rende <b>{BRL(diferenca)}</b> a mais, considerando que o
                 investimento alternativo
                 {isentoAlt
-                  ? ' e isento de IR'
+                  ? ' é isento de IR'
                   : ` paga apenas ${PCT(irAlt * 100)} sobre os ganhos`}
                 . Considere aumentar o horizonte — o PGBL melhora a partir
                 de 10 anos.

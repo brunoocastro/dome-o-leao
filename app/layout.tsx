@@ -5,37 +5,37 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import CopyLlmsTxt from '@/components/CopyLlmsTxt'
 
 export const metadata: Metadata = {
-  title: 'Dome o Leao — Simulador IRPF 2026 | Pague o Minimo, Receba o Maximo',
+  title: 'Dome o Leão — Simulador IRPF 2026 | Pague o Mínimo, Receba o Máximo',
   description:
-    'Dome o Leao do Imposto de Renda! Simulador gratuito IRPF 2026 com calculo de INSS, IRRF, restituicao, estrategia PGBL/FAPI e comparativo de longo prazo entre PGBL vs Selic, CDB, LCI, FIIs e acoes — tudo apos impostos. Valores oficiais Lei 15.191/2025 e Lei 15.270/2025.',
+    'Dome o Leão do Imposto de Renda! Simulador gratuito IRPF 2026 com cálculo de INSS, IRRF, restituição, estratégia PGBL/FAPI e comparativo de longo prazo entre PGBL vs Selic, CDB, LCI, FIIs e ações — tudo após impostos. Valores oficiais Lei 15.191/2025 e Lei 15.270/2025.',
   keywords: [
-    'dome o leao',
+    'dome o leão',
     'IRPF 2026',
     'simulador imposto de renda',
     'PGBL',
     'FAPI',
-    'restituicao',
-    'declaracao imposto de renda',
+    'restituição',
+    'declaração imposto de renda',
     'calculadora IRPF',
-    'aliquota efetiva',
+    'alíquota efetiva',
     'INSS 2026',
     'PGBL vs Selic',
     'comparativo investimentos',
     'leao imposto de renda',
   ],
   openGraph: {
-    title: 'Dome o Leao — Simulador IRPF 2026 | Pague o Minimo, Receba o Maximo',
+    title: 'Dome o Leão — Simulador IRPF 2026 | Pague o Mínimo, Receba o Máximo',
     description:
-      'Dome o Leao! Simulador IRPF 2026 com estrategia PGBL/FAPI e comparativo de longo prazo entre PGBL vs Selic, CDB, LCI, FIIs — tudo apos impostos.',
+      'Dome o Leão! Simulador IRPF 2026 com estratégia PGBL/FAPI e comparativo de longo prazo entre PGBL vs Selic, CDB, LCI, FIIs — tudo após impostos.',
     type: 'website',
     locale: 'pt_BR',
-    siteName: 'Dome o Leao',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Dome o Leao' }],
+    siteName: 'Dome o Leão',
+    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Dome o Leão' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dome o Leao — Dome o Leao do Imposto de Renda 2026',
-    description: 'Pague o minimo, receba o maximo. Simulador IRPF 2026 com comparativo PGBL vs investimentos.',
+    title: 'Dome o Leão — Dome o Leão do Imposto de Renda 2026',
+    description: 'Pague o mínimo, receba o máximo. Simulador IRPF 2026 com comparativo PGBL vs investimentos.',
   },
   robots: {
     index: true,
@@ -57,10 +57,10 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Dome o Leao — Simulador IRPF 2026',
-  alternateName: 'Dome o Leao',
+  name: 'Dome o Leão — Simulador IRPF 2026',
+  alternateName: 'Dome o Leão',
   description:
-    'Simulador gratuito de Imposto de Renda 2026 com calculo de INSS, IRRF, restituicao, estrategia PGBL/FAPI e comparativo de longo prazo entre PGBL vs investimentos alternativos.',
+    'Simulador gratuito de Imposto de Renda 2026 com cálculo de INSS, IRRF, restituição, estratégia PGBL/FAPI e comparativo de longo prazo entre PGBL vs investimentos alternativos.',
   url: 'https://domeoleao.com.br',
   applicationCategory: 'FinanceApplication',
   operatingSystem: 'Any',
