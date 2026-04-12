@@ -1,0 +1,46 @@
+# DomeoLeao — Simulador IRPF 2026
+
+> DomeoLeao ("Dome o Leao") e um simulador gratuito e open source de Imposto de Renda Pessoa Fisica (IRPF) para o ano-calendario 2026 no Brasil. Calcula imposto devido, aliquota efetiva, IRRF, restituicao, e recomenda a melhor estrategia de investimento em PGBL/FAPI para maximizar restituicao. Seu diferencial e o comparativo de longo prazo (1-30 anos) entre PGBL e investimentos alternativos (Selic, CDB, LCI/LCA, FIIs, Acoes) considerando todos os impostos no resgate — algo que nenhum outro simulador oferece. Valores oficiais baseados na Lei 15.191/2025 (tabela progressiva) e Lei 15.270/2025 (redutor de imposto e desconto simplificado).
+
+O simulador opera em 3 etapas: (1) coleta de dados do contribuinte (renda, deducoes, previdencia), (2) calculo do imposto e comparacao entre declaracao completa vs simplificada, (3) estrategia de investimento em PGBL/FAPI com calculadora interativa e comparativo de longo prazo.
+
+Conceitos-chave utilizados nos calculos:
+
+- **INSS progressivo**: Tabela com 4 faixas (7,5% a 14%), teto R$ 8.475,55/mes, contribuicao maxima R$ 988,09/mes
+- **IRPF progressivo anual**: 5 faixas (0% a 27,5%) com parcela a deduzir, isencao ate R$ 29.145,60/ano
+- **Redutor de imposto 2026**: Formula `8.429,73 - (0,095575 * base_anual)` garante isencao ate R$ 5.000/mes com reducao gradual ate R$ 7.350/mes
+- **IRRF**: Imposto retido na fonte pelo empregador, subtraido do imposto apurado (gera restituicao se IRRF > imposto)
+- **PGBL/FAPI**: Deducao ate 12% da renda bruta anual; resgate tributado pela tabela regressiva (35% ate 2 anos, 10% apos 10 anos)
+- **Desconto simplificado**: 20% da renda tributavel, limitado a R$ 17.640,00/ano
+- **Deducoes legais**: Dependentes (R$ 2.275,08/ano cada), saude (sem limite), educacao (R$ 3.561,50/pessoa), pensao judicial (sem limite)
+
+Tecnologias: Next.js 15, React 19, TypeScript, Recharts, Vercel Analytics.
+
+## Docs
+
+- [Metodologia de Calculo](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/CALCULO.md): Documento completo com todas as formulas, tabelas, regras de calculo e fontes oficiais utilizadas no simulador. Inclui INSS progressivo, IRPF com redutor 2026, IRRF, deducoes, PGBL/FAPI (tabelas regressiva e progressiva), e comparativo de investimentos de longo prazo.
+- [Biblioteca de Calculo (calculo.ts)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/lib/calculo.ts): Funcoes puras em TypeScript para calculo de INSS, IRPF, IRRF, simulacao PGBL. Contem todas as constantes oficiais (faixas, aliquotas, deducoes) e tipos (SimState, SimResult).
+- [Biblioteca de Investimentos (investimento.ts)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/lib/investimento.ts): Funcoes para projecao de longo prazo: simulacao PGBL vs investimentos alternativos, tabela regressiva PGBL, presets de investimento (Selic, CDB, LCI/LCA, FIIs, Acoes).
+
+## Fontes Oficiais
+
+- [Receita Federal — Tabelas IRPF 2026](https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026): Tabelas progressivas mensais e anuais, valores de deducoes
+- [Gov.br — Nova Tabela IR com isencao ate R$ 5 mil](https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/01/nova-tabela-do-ir-veja-faixas-e-aliquotas-e-saiba-mais-sobre-medida-que-isenta-o-pagamento-para-quem-ganha-ate-r-5-mil): Explicacao do redutor de imposto e formula
+- [Receita Federal — Exemplos de calculo Lei 15.270/2025](https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-191-2025): Exemplos oficiais passo a passo com valores reais
+- [Contabilizei — Tabela INSS 2026](https://www.contabilizei.com.br/contabilidade-online/tabela-inss/): Aliquotas progressivas, teto e calculo
+- [Lei 15.270/2025 — Desconto simplificado](https://www.sager.adv.br/novo-limite-desconto-simplificado-irpf-2026/): Novo teto de R$ 17.640,00
+
+## Codigo-Fonte
+
+- [Componente Simulador (Simulador.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/components/Simulador.tsx): Componente principal React com formulario, calculos e resultados
+- [Comparativo de Investimentos (ComparativoInvestimentos.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/components/ComparativoInvestimentos.tsx): Componente React com grafico Recharts para comparacao PGBL vs alternativas
+- [Layout e SEO (layout.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/app/layout.tsx): Metadados SEO, JSON-LD, Vercel Analytics
+- [CSS Global (globals.css)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/app/globals.css): Design system com variaveis CSS, responsivo (mobile-first)
+
+## Optional
+
+- [Contabeis — Limites de deducao IR 2026](https://www.contabeis.com.br/noticias/75860/imposto-de-renda-2026-veja-os-limites-de-deducao/): Detalhamento de cada tipo de deducao
+- [Suno — Tributacao do PGBL](https://www.suno.com.br/artigos/tributacao-do-pgbl/): Tabela regressiva e progressiva para previdencia
+- [B3 — Taxacao de investimentos](https://borainvestir.b3.com.br/noticias/imposto-de-renda/taxacao-de-fii-lci-lca-cdb-e-outros-veja-como-ficam-os-impostos-sobre-investimentos/): IR sobre FII, LCI, LCA, CDB e demais investimentos
+- [BCB — Taxa Selic](https://www.bcb.gov.br/controleinflacao/taxaselic): Taxa Selic vigente (14,75% a.a. em 2026)
+- [Especificacao llms.txt](https://llmstxt.org/): Formato deste arquivo
