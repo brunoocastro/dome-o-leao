@@ -6,10 +6,10 @@
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue?style=for-the-badge" alt="MIT License" />
 </p>
 
-<h1 align="center">DomeoLeao<br/><sub>Simulador IRPF 2026 — Pague o Minimo, Receba o Maximo</sub></h1>
+<h1 align="center">Dome o Leao<br/><sub>Simulador IRPF 2026 — Pague o Minimo, Receba o Maximo</sub></h1>
 
 <p align="center">
-  <strong>Dome o Leao do Imposto de Renda! Calcule seu IRPF, otimize sua estrategia PGBL/FAPI e compare o impacto real a longo prazo — apos todos os impostos — entre PGBL e outros investimentos.</strong>
+  <strong>O leao do Imposto de Renda so ruge pra quem nao tem os numeros certos. Descubra quanto pagar, quanto receber e onde investir pra ele ficar mansinho.</strong>
 </p>
 
 <p align="center">

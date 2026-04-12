@@ -791,8 +791,8 @@ export default function Simulador() {
       {/* Header */}
       <header>
         <div className="badge">Ano-calendario 2026</div>
-        <h1><span>DomeoLeao</span><br />Simulador IRPF 2026</h1>
-        <p>Pague o minimo, receba o maximo. Calcule seu imposto, otimize PGBL/FAPI e compare investimentos a longo prazo.<br />
+        <h1><span>Dome o Leao</span><br />Simulador IRPF 2026</h1>
+        <p>O leao do Imposto de Renda so ruge pra quem nao tem os numeros certos. Descubra quanto pagar, quanto receber e onde investir pra ele ficar mansinho.<br />
         <span style={{ fontSize: '11px', opacity: 0.6 }}>Valores oficiais: Lei 15.191/2025 (tabela) + Lei 15.270/2025 (redutor e desc. simplificado)</span></p>
       </header>
 

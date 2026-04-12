@@ -1,6 +1,6 @@
-# Metodologia de Calculo — DomeoLeao (Simulador IRPF 2026)
+# Metodologia de Calculo — Dome o Leao (Simulador IRPF 2026)
 
-Este documento descreve cada conceito, formula e fonte oficial utilizada como base para os calculos do DomeoLeao — Simulador IRPF 2026 com Estrategia PGBL/FAPI e Comparativo de Investimentos.
+Este documento descreve cada conceito, formula e fonte oficial utilizada como base para os calculos do Dome o Leao — Simulador IRPF 2026 com Estrategia PGBL/FAPI e Comparativo de Investimentos.
 
 ---
 

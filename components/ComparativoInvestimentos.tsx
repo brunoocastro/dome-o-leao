@@ -75,7 +75,6 @@ export default function ComparativoInvestimentos({
       horizonteAnos: horizonte,
       aliquotaMarginalIR,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     aporteMensal, aporteMinimoPGBL, saldoAtual, rendPGBL,
     rendAlt, irAlt, isentoAlt, tabelaPGBL,
