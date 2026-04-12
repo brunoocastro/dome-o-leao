@@ -272,3 +272,47 @@ describe('constants', () => {
     expect(RENDA_FIXA_IR).toHaveLength(4)
   })
 })
+
+// ---------------------------------------------------------------------------
+// 6. Edge case coverage — fallback paths
+// ---------------------------------------------------------------------------
+describe('Fallback and edge-case coverage', () => {
+  it('calcPGBLAliqRegressiva returns 0.10 for very large year values', () => {
+    expect(calcPGBLAliqRegressiva(999)).toBe(0.10)
+  })
+
+  it('calcPGBLAliqProgressiva handles very large withdrawal (above all brackets)', () => {
+    const rate = calcPGBLAliqProgressiva(1000000)
+    // 1000000 * 0.275 - 10904.66 = 264095.34
+    // effective = 264095.34 / 1000000 = 0.26409534
+    expect(rate).toBeCloseTo(0.26409534, 4)
+    expect(rate).toBeLessThanOrEqual(0.275)
+  })
+
+  it('formatBRL handles very small numbers', () => {
+    expect(formatBRL(0.01)).toBe('R$ 0,01')
+    expect(formatBRL(0.001)).toBe('R$ 0,00')
+  })
+
+  it('simulaInvestimentoLongoPrazo with zero aporte', () => {
+    const params: InvestmentParams = {
+      aporteAnualPGBL: 0,
+      aporteMinimoPGBL: 0,
+      saldoAtualPGBL: 10000,
+      rendimentoPGBL: 10,
+      rendimentoAlternativo: 12,
+      irSobreLucroAlt: 0.15,
+      tabelaPGBL: 'regressiva' as const,
+      horizonteAnos: 5,
+      aliquotaMarginalIR: 0.15,
+    }
+    const result = simulaInvestimentoLongoPrazo(params)
+    expect(result).toHaveLength(5)
+    // With zero aporte, saldo still grows from initial balance
+    expect(result[0].pgblSaldo).toBeCloseTo(10000 * 1.10, 2)
+    // No alt investment
+    expect(result[0].mixAltSaldo).toBe(0)
+    // Aportes acum should be 0
+    expect(result[4].pgblAportesAcum).toBe(0)
+  })
+})

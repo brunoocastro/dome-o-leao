@@ -402,6 +402,31 @@ describe('findAporteMinimo', () => {
     expect(resultado.resultFinal).toBeLessThanOrEqual(0);
   });
 
+  it('returns aporte 0 when pgblMaxAnual is 0', () => {
+    const st: SimState = {
+      rendaAnual: 60000,
+      irrfAnual: 0,
+      inssAnual: 0,
+      deducaoDependentesAnual: 0,
+      despMedAnual: 0,
+      despEduAnual: 0,
+      pensaoAnual: 0,
+      pgblMaxAnual: 0,
+      baseSemPGBL: 60000,
+      impostoSemPGBL: calcIRPF(60000),
+      prevAnualAtual: 0,
+      impostoCompleto: 0,
+      impostoSimplificado: 0,
+      resultadoCompleto: 0,
+      resultadoSimplificado: 0,
+      melhorModelo: 'completo',
+      descontoSimp: 12000,
+      totalDeducoesAnual: 0,
+    };
+    const { aporte } = findAporteMinimo(st);
+    expect(aporte).toBe(0);
+  });
+
   it('returned aporte is a multiple of 12', () => {
     const st: SimState = {
       rendaAnual: 84000,
@@ -425,5 +450,127 @@ describe('findAporteMinimo', () => {
     };
     const { aporte } = findAporteMinimo(st);
     expect(aporte % 12).toBe(0);
+  });
+});
+
+// ===========================================================================
+// 10. Official gov.br Examples (Lei 15.270/2025)
+// Source: https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-191-2025
+// ===========================================================================
+describe('Official gov.br Examples — IRRF Mensal (Lei 15.270/2025)', () => {
+  // Note: Our calcIRRFMensal uses desconto simplificado (R$ 607,20) by default.
+  // The gov.br examples use either desc. simplificado OR deducoes legais.
+  // Examples 1-3 use desc. simplificado. Example 4 uses deducoes legais only.
+  // We test examples 1-3 exactly, and example 4/5 for the INSS and redutor logic.
+
+  it('Example 1: R$ 3.036 — aliquota zero', () => {
+    // Rendimento: 3036, INSS calculated, desc simp 607.20, base ~2171 → isenta
+    expect(calcIRRFMensal(3036)).toBe(0);
+  });
+
+  it('Example 2: R$ 4.000 — renda ate R$ 5.000, redutor zera', () => {
+    // Renda <= 5000 → redutor zera qualquer imposto
+    expect(calcIRRFMensal(4000)).toBe(0);
+  });
+
+  it('Example 3: R$ 5.000 — redutor R$ 312,89 zera imposto', () => {
+    expect(calcIRRFMensal(5000)).toBe(0);
+  });
+
+  it('Example 4: R$ 6.000 — redutor parcial (com desc simplificado)', () => {
+    // Our function uses desc simplificado, gov.br example uses deducoes legais
+    // With desc simp: base = 6000 - INSS - 607.20, redutor applied
+    const result = calcIRRFMensal(6000);
+    expect(result).toBeGreaterThan(0);
+    expect(result).toBeLessThan(400); // Less than gov.br example (382.88) due to desc simp
+  });
+
+  it('Example 5: R$ 7.607,20 — sem redutor', () => {
+    // Renda > 7350 → no redutor applied
+    const result = calcIRRFMensal(7607.20);
+    expect(result).toBeGreaterThan(0);
+  });
+
+  it('Redutor formula: 978.62 - 0.133145 * renda (between 5001 and 7349)', () => {
+    // At renda 5001: redutor = 978.62 - 0.133145*5001 = 312.7559... (almost full)
+    // Imposto should be very close to 0
+    const result = calcIRRFMensal(5001);
+    expect(result).toBeCloseTo(0, 0);
+  });
+
+  it('Redutor boundary: renda 7350 — redutor is 0', () => {
+    // redutor = 978.62 - 0.133145 * 7350 = 978.62 - 978.6158 = 0.0042
+    // Effectively no redutor
+    const result = calcIRRFMensal(7350);
+    expect(result).toBeGreaterThan(0);
+  });
+});
+
+// ===========================================================================
+// 11. INSS official verification against manual progressive calculation
+// ===========================================================================
+describe('INSS official progressive verification', () => {
+  it('matches manual bracket-by-bracket calculation for R$ 5.000', () => {
+    // Bracket 1: 1621 * 7.5% = 121.575
+    // Bracket 2: (2902.84 - 1621) * 9% = 115.3656
+    // Bracket 3: (4354.27 - 2902.84) * 12% = 174.1716
+    // Bracket 4: (5000 - 4354.27) * 14% = 90.4022
+    const expected = 121.575 + 115.3656 + 174.1716 + 90.4022;
+    expect(calcINSS(5000)).toBeCloseTo(expected, 2);
+  });
+
+  it('matches manual calculation at exact teto (R$ 8.475,55)', () => {
+    // Bracket 1: 1621 * 7.5% = 121.575
+    // Bracket 2: 1281.84 * 9% = 115.3656
+    // Bracket 3: 1451.43 * 12% = 174.1716
+    // Bracket 4: 4121.28 * 14% = 576.9792
+    const expected = 121.575 + 115.3656 + 174.1716 + 576.9792;
+    expect(calcINSS(8475.55)).toBeCloseTo(expected, 1);
+    expect(calcINSS(8475.55)).toBeCloseTo(988.09, 0);
+  });
+});
+
+// ===========================================================================
+// 12. IRPF annual — full bracket verification
+// ===========================================================================
+describe('IRPF annual bracket verification', () => {
+  it('exact boundary: R$ 29.145,60 — top of exempt bracket', () => {
+    expect(calcIRPF(29145.60)).toBe(0);
+  });
+
+  it('R$ 29.145,61 — enters 7.5% bracket, but redutor zeros it', () => {
+    // Still below 60000 → redutor zeros imposto
+    expect(calcIRPF(29145.61)).toBe(0);
+  });
+
+  it('R$ 33.919,80 — top of 7.5% bracket, still below redutor threshold', () => {
+    // 33919.80 * 0.075 - 2185.92 = 357.065
+    // But 33919.80 < 60000 → redutor zeros it
+    expect(calcIRPF(33919.80)).toBe(0);
+  });
+
+  it('R$ 55.976,16 — top of 22.5% bracket, but below 60k redutor threshold', () => {
+    // 55976.16 < 60000 (REDUTOR_BASE_ISENTO) → redutor zeros imposto
+    expect(calcIRPF(55976.16)).toBe(0);
+  });
+
+  it('R$ 65.000 — within redutor zone (60k-88.2k), redutor partially reduces', () => {
+    // Imposto: 65000 * 0.275 - 10904.66 = 6970.34
+    // Redutor: 8429.73 - 0.095575 * 65000 = 2217.355
+    // Final: 6970.34 - 2217.355 = 4752.985
+    expect(calcIRPF(65000)).toBeCloseTo(4752.99, 0);
+  });
+
+  it('R$ 88.200 — exactly at redutor boundary (no redutor)', () => {
+    // 88200 * 0.275 - 10904.66 = 13350.34
+    // At boundary: redutor formula = 8429.73 - 0.095575*88200 = 0.015 (effectively 0)
+    // But code uses < (not <=) so no redutor at exactly 88200
+    const result = calcIRPF(88200);
+    expect(result).toBeCloseTo(13350.34, 0);
+  });
+
+  it('above all brackets: R$ 200.000', () => {
+    // 200000 * 0.275 - 10904.66 = 44095.34
+    expect(calcIRPF(200000)).toBeCloseTo(44095.34, 2);
   });
 });
