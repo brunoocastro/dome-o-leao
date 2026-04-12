@@ -26,15 +26,15 @@ test.describe('Page Load & SEO', () => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
-    await expect(page).toHaveTitle(/Dome o Leao/)
+    await expect(page).toHaveTitle(/Dome o Leão/)
   })
 
-  test('should display header with Dome o Leao branding', async ({ page }) => {
+  test('should display header with Dome o Leão branding', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
     const heading = page.locator('header h1')
-    await expect(heading).toContainText('Dome o Leao')
+    await expect(heading).toContainText('Dome o Leão')
     await expect(heading).toContainText('Simulador IRPF 2026')
   })
 
@@ -107,7 +107,7 @@ test.describe('Form -- Input Fields', () => {
   })
 
   test('should display Bloco B -- Deducoes with all fields', async ({ page }) => {
-    await expect(page.locator('text=Bloco B — Deducoes')).toBeVisible()
+    await expect(page.locator('text=Bloco B — Deduções')).toBeVisible()
 
     await expect(page.locator('#dependentes')).toBeVisible()
     await expect(page.locator('#inss-auto')).toBeChecked()
@@ -118,7 +118,7 @@ test.describe('Form -- Input Fields', () => {
   })
 
   test('should display Bloco C -- Previdencia with toggle', async ({ page }) => {
-    await expect(page.locator('text=Bloco C — Previdencia Complementar')).toBeVisible()
+    await expect(page.locator('text=Bloco C — Previdência Complementar')).toBeVisible()
 
     // Default should be "Nao possuo"
     await expect(page.locator('#prev-nao')).toBeChecked()
