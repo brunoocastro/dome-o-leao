@@ -386,7 +386,7 @@ export default function ComparativoInvestimentos({
                   <th className="text-right">+ Benefício IR</th>
                   <th className="text-right">Total PGBL</th>
                   <th className="text-right">Mix Líquido</th>
-                  <th className="text-right">Vencedor</th>
+                  <th className="text-right">Maior saldo</th>
                 </tr>
               </thead>
               <tbody>
@@ -435,30 +435,34 @@ export default function ComparativoInvestimentos({
           className={`verdict ${vencedor === 'pgbl' ? 'green' : 'blue'}`}
           style={{ marginTop: 16 }}
         >
-          <span className="vc-icon">{vencedor === 'pgbl' ? '🏆' : '💡'}</span>
+          <span className="vc-icon">ℹ️</span>
           <span>
             {vencedor === 'pgbl' ? (
               <>
-                Em <b>{horizonte} anos</b>, investir o{' '}
-                <b>teto do PGBL</b> rende <b>{BRL(diferenca)}</b> a mais
-                que a estratégia mista, considerando o benefício fiscal +
-                rendimento. O PGBL vence pela dedução de IR + alíquota
-                regressiva de {PCT(ultimo.pgblAliqResgate * 100)} após{' '}
-                {horizonte} anos.
+                Nesta simulação, em <b>{horizonte} anos</b>, o cenário{' '}
+                <b>PGBL no teto</b> resulta em <b>{BRL(diferenca)}</b> a mais
+                que a estratégia mista, considerando a dedução fiscal +
+                rendimento. A alíquota regressiva do PGBL seria de{' '}
+                {PCT(ultimo.pgblAliqResgate * 100)} neste horizonte.
+                <br /><small style={{opacity: 0.7, marginTop: 4, display: 'block'}}>
+                  Importante: o PGBL tributa o valor TOTAL no resgate e tem baixa liquidez. Resultados dependem de taxas de administração, rentabilidade real e cenário econômico futuro.
+                </small>
               </>
             ) : (
               <>
-                Em <b>{horizonte} anos</b>, a estratégia de{' '}
+                Nesta simulação, em <b>{horizonte} anos</b>, o cenário{' '}
                 <b>
                   mínimo PGBL + {nomeAlternativo}
                 </b>{' '}
-                rende <b>{BRL(diferenca)}</b> a mais, considerando que o
+                resulta em <b>{BRL(diferenca)}</b> a mais, considerando que o
                 investimento alternativo
                 {isentoAlt
                   ? ' é isento de IR'
-                  : ` paga apenas ${PCT(irAlt * 100)} sobre os ganhos`}
-                . Considere aumentar o horizonte — o PGBL melhora a partir
-                de 10 anos.
+                  : ` paga ${PCT(irAlt * 100)} sobre os ganhos`}
+                . Em horizontes maiores (10+ anos), a alíquota regressiva do PGBL (10%) tende a tornar o cenário PGBL mais competitivo.
+                <br /><small style={{opacity: 0.7, marginTop: 4, display: 'block'}}>
+                  Importante: rentabilidades passadas não garantem retorno futuro. A escolha depende do seu perfil, objetivos e necessidade de liquidez.
+                </small>
               </>
             )}
           </span>

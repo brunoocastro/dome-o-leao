@@ -289,17 +289,17 @@ export default function Simulador() {
       reportIdealContent.innerHTML = `
     <div class="report-grid">
       <div class="report-item featured">
-        <div class="ri-label">Aporte Ideal (teto 12%)</div>
+        <div class="ri-label">Teto Dedutível (12% da renda bruta)</div>
         <div class="ri-value text-green">${BRL(st.pgblMaxAnual)}<span style="font-size:13px;color:var(--muted)">/ano</span></div>
         <div class="ri-sub">${BRL(idealMensal)}/mês</div>
       </div>
       <div class="report-item featured">
-        <div class="ri-label">Resultado com Aporte Ideal</div>
+        <div class="ri-label">Resultado com Aporte no Teto</div>
         <div class="ri-value ${teto.resultFinal < 0 ? 'text-green' : 'text-red'}">${teto.resultFinal < 0 ? '(Restituir) ' : '(A pagar) '}${BRL(Math.abs(teto.resultFinal))}</div>
         <div class="ri-sub">Imposto apurado: ${BRL(teto.impostoFinal)}</div>
       </div>
       <div class="report-item">
-        <div class="ri-label">Resultado Atual (sem aporte ideal)</div>
+        <div class="ri-label">Resultado sem PGBL</div>
         <div class="ri-value ${semPgbl.resultFinal < 0 ? 'text-green' : 'text-red'}">${semPgbl.resultFinal < 0 ? '(Restituir) ' : '(A pagar) '}${BRL(Math.abs(semPgbl.resultFinal))}</div>
         <div class="ri-sub">Imposto apurado: ${BRL(semPgbl.impostoFinal)}</div>
       </div>
@@ -309,10 +309,9 @@ export default function Simulador() {
         <div class="ri-sub">Diferença de imposto apurado com vs. sem PGBL</div>
       </div>
     </div>
-    ${teto.resultFinal < semPgbl.resultFinal ? `<div class="verdict green" style="margin-top:14px">
-      <span class="vc-icon">&#128176;</span>
-      <span>Com o aporte ideal, ${teto.resultFinal < 0 ? `sua restituição aumenta em <b>${BRL(Math.abs(teto.resultFinal - semPgbl.resultFinal))}</b>` : `você paga <b>${BRL(semPgbl.resultFinal - teto.resultFinal)}</b> a menos de imposto`} e ainda constrói patrimônio na previdência.</span>
-    </div>` : ''}`
+    <div class="hint-box" style="margin-top:14px">
+      <b>Como interpretar:</b> O aporte no teto de 12% reduz a base de cálculo do IR, diminuindo o imposto apurado. A diferença entre os cenários (${BRL(Math.abs(teto.resultFinal - semPgbl.resultFinal))}) representa a economia tributária possível — mas o valor investido no PGBL fica bloqueado até o resgate, e será tributado pela tabela regressiva (10% a 35%). Consulte um profissional para avaliar se essa estratégia é adequada ao seu perfil.
+    </div>`
     }
 
     // Grafico comparativo
@@ -323,9 +322,9 @@ export default function Simulador() {
         const pct = Math.abs(c.resultFinal) / maxAbsResult * 100
         const isRest = c.resultFinal < 0
         const color = isRest ? 'var(--primary)' : 'var(--danger)'
-        const tagHtml = c.tag === 'ideal' ? '<span class="tag tag-ideal">IDEAL</span>'
+        const tagHtml = c.tag === 'ideal' ? '<span class="tag tag-ideal">TETO 12%</span>'
           : c.tag === 'atual' ? '<span class="tag tag-atual">ATUAL</span>'
-          : c.tag === 'min' ? '<span class="tag tag-min">MIN</span>' : ''
+          : c.tag === 'min' ? '<span class="tag tag-min">MÍNIMO</span>' : ''
         const isActive = c.tag === 'ideal'
         return `<div class="chart-row ${isActive ? 'chart-active' : ''}">
           <div class="chart-label">${c.label} ${tagHtml}<br><span style="font-size:10px;color:var(--accent)">${BRL(c.pgblAnual)}/ano</span></div>
@@ -349,20 +348,20 @@ export default function Simulador() {
           <div class="ri-sub">${BRL(minMensal)}/mês</div>
         </div>
         <div class="report-item">
-          <div class="ri-label">Sem esse aporte, você pagaria</div>
+          <div class="ri-label">Imposto a pagar sem PGBL</div>
           <div class="ri-value text-red">${BRL(Math.abs(semRes))}</div>
-          <div class="ri-sub">de imposto — dinheiro que vai para a Receita em vez do seu patrimônio</div>
+          <div class="ri-sub">Valor que seria direcionado ao IR ao invés de previdência complementar</div>
         </div>
       </div>
       <div class="verdict warn" style="margin-top:14px">
         <span class="vc-icon">&#9888;&#xFE0F;</span>
-        <span>Aplicando pelo menos <b>${BRL(minMensal)}/mês</b> em PGBL, o valor que seria pago de IR vira investimento no seu nome. Abaixo desse valor, parte do imposto é paga sem necessidade.</span>
+        <span>Com um aporte de <b>${BRL(minMensal)}/mês</b> em PGBL, o imposto a pagar seria zerado — o valor que iria para o IR passaria a compor sua previdência. Avalie com um profissional se faz sentido para seu perfil e liquidez.</span>
       </div>`
       } else {
         reportMinimoContent.innerHTML = `
       <div class="verdict green">
         <span class="vc-icon">&#10003;</span>
-        <span>Seu resultado já é restituição mesmo sem PGBL. Qualquer aporte adicional em PGBL <b>aumenta ainda mais</b> sua restituição.</span>
+        <span>Seu resultado já é restituição mesmo sem PGBL. Aportes adicionais em PGBL reduziriam ainda mais a base de cálculo, mas o valor ficaria bloqueado na previdência. Avalie conforme sua necessidade de liquidez.</span>
       </div>`
       }
     }
@@ -431,7 +430,7 @@ export default function Simulador() {
         <div class="calc-item ${diff > 0 ? 'ci-green' : ''}">
           <div class="ci-label">Economia vs. Sem PGBL</div>
           <div class="ci-value">${diff > 0 ? '+' : ''}${BRL(diff)}</div>
-          <div class="ci-sub">${diff > 0 ? 'Você ganha mais ou paga menos' : 'Sem diferença'}</div>
+          <div class="ci-sub">${diff > 0 ? 'Redução no imposto apurado' : 'Sem diferença'}</div>
         </div>
       </div>
       <div class="calc-vs">
@@ -654,7 +653,7 @@ export default function Simulador() {
     if (compareGrid) {
       compareGrid.innerHTML = `
     <div class="compare-card ${cRec === 'completo' ? 'recommended' : ''}">
-      <h4>Deduções Legais ${cRec === 'completo' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
+      <h4>Deduções Legais ${cRec === 'completo' ? '<span class="rec-badge">Menor imposto</span>' : ''}</h4>
       <div class="compare-row"><span>Deduções Detalhadas</span><span class="cv text-green">${BRL(totalDeducoesAnual)}</span></div>
       <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseCompleta)}</span></div>
       <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoCompleto)}</span></div>
@@ -663,7 +662,7 @@ export default function Simulador() {
       <div class="compare-row"><span>Alíquota Efetiva</span><span class="cv">${PCT(rendaAnual > 0 ? impostoCompleto / rendaAnual * 100 : 0)}</span></div>
     </div>
     <div class="compare-card ${cRec === 'simplificado' ? 'recommended' : ''}">
-      <h4>Desconto Simplificado ${cRec === 'simplificado' ? '<span class="rec-badge">Recomendado</span>' : ''}</h4>
+      <h4>Desconto Simplificado ${cRec === 'simplificado' ? '<span class="rec-badge">Menor imposto</span>' : ''}</h4>
       <div class="compare-row"><span>Desconto Fixo (20%)</span><span class="cv text-green">${BRL(descontoSimp)}</span></div>
       <div class="compare-row"><span>Base de Cálculo</span><span class="cv">${BRL(baseSimplificada)}</span></div>
       <div class="compare-row"><span>Imposto Apurado</span><span class="cv text-warn">${BRL(impostoSimplificado)}</span></div>
@@ -731,14 +730,14 @@ export default function Simulador() {
       verdictHtml = `<div class="verdict green"><span class="vc-icon">&#127881;</span><span>Você está na faixa de <b>isenção</b> pelo mecanismo de Redutor 2026. Nenhum imposto é devido.</span></div>`
     } else if (melhorModelo === 'completo' && economiaPGBL > 200) {
       verdictHtml = `
-      <div class="verdict green"><span class="vc-icon">&#9989;</span><span>Use a <b>Declaração Completa</b> — suas deduções superam o desconto simplificado.</span></div>
-      <div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Investindo mais <b>${BRL(pgblFaltante)}/ano</b> em PGBL, você economiza <b>${BRL(economiaPGBL)}</b> de imposto.</span></div>`
+      <div class="verdict green"><span class="vc-icon">&#9989;</span><span>Nesta simulação, a <b>Declaração Completa</b> resulta em menor imposto — suas deduções superam o desconto simplificado de 20%.</span></div>
+      <div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Um aporte adicional de <b>${BRL(pgblFaltante)}/ano</b> em PGBL reduziria o imposto apurado em <b>${BRL(economiaPGBL)}</b>. Esse valor ficaria investido na previdência.</span></div>`
     } else if (melhorModelo === 'simplificado') {
       verdictHtml = `
-      <div class="verdict warn"><span class="vc-icon">&#128203;</span><span>O <b>Desconto Simplificado</b> é mais vantajoso para seu perfil — deduções abaixo de 20% da renda.</span></div>
-      ${economiaPGBL > 100 ? `<div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Ainda assim, aportar em PGBL pode gerar economia de <b>${BRL(economiaPGBL)}</b> ao ano.</span></div>` : ''}`
+      <div class="verdict warn"><span class="vc-icon">&#128203;</span><span>Nesta simulação, o <b>Desconto Simplificado</b> resulta em menor imposto — suas deduções ficaram abaixo de 20% da renda.</span></div>
+      ${economiaPGBL > 100 ? `<div class="verdict blue" style="margin-top:10px"><span class="vc-icon">&#128161;</span><span>Aportes em PGBL poderiam gerar economia de até <b>${BRL(economiaPGBL)}</b> ao ano no imposto apurado, mas a decisão depende do seu planejamento financeiro.</span></div>` : ''}`
     } else {
-      verdictHtml = `<div class="verdict blue"><span class="vc-icon">&#8505;&#65039;</span><span>Use a <b>Declaração Completa</b>. Considere elevar aportes em PGBL para maximizar deduções.</span></div>`
+      verdictHtml = `<div class="verdict blue"><span class="vc-icon">&#8505;&#65039;</span><span>Nesta simulação, a <b>Declaração Completa</b> resulta em menor imposto. Aportes em PGBL reduziriam ainda mais a base de cálculo.</span></div>`
     }
     const verdictBox = document.getElementById('verdict-box')
     if (verdictBox) verdictBox.innerHTML = verdictHtml
@@ -1064,6 +1063,9 @@ export default function Simulador() {
         <div className="result-header">
           <h2>Resultado da Simulação</h2>
           <p id="result-subtitle">Ano-calendário 2026 — Declaração 2027</p>
+          <p style={{ fontSize: '11px', color: 'var(--muted)', opacity: 0.7, marginTop: '8px', maxWidth: '600px', marginInline: 'auto' }}>
+            Este é um simulador educativo baseado nas regras tributárias vigentes. Não constitui recomendação de investimento. Consulte um profissional.
+          </p>
         </div>
 
         {/* Resultado principal */}
@@ -1137,7 +1139,7 @@ export default function Simulador() {
         <div className="section-title">Etapa 3 — Estratégia FAPI / PGBL</div>
 
         <div className="strategy-box">
-          <h3>&#127919;&#xFE0F; Aporte Ideal em Previdência Complementar</h3>
+          <h3>&#128202; Simulação de Aportes em Previdência Complementar</h3>
           <div id="strategy-rows"></div>
         </div>
 
@@ -1163,11 +1165,11 @@ export default function Simulador() {
         <div id="verdict-box"></div>
 
         {/* Relatorio Completo PGBL */}
-        <div className="section-title">Relatório — Aporte Ideal PGBL/FAPI</div>
+        <div className="section-title">Relatório — Simulação de Aportes PGBL/FAPI</div>
 
-        {/* Resumo do aporte ideal */}
+        {/* Cenário: teto de 12% */}
         <div className="card" id="report-ideal">
-          <div className="card-title"><span className="icon">&#127919;</span> Aporte Ideal para Máxima Restituição</div>
+          <div className="card-title"><span className="icon">&#128202;</span> Cenário: Aporte no Teto de 12%</div>
           <div id="report-ideal-content"></div>
         </div>
 
@@ -1184,7 +1186,7 @@ export default function Simulador() {
 
         {/* Aporte minimo */}
         <div className="card" id="report-minimo">
-          <div className="card-title"><span className="icon">&#9888;&#xFE0F;</span> Aporte Mínimo — Não &quot;Perder Dinheiro&quot;</div>
+          <div className="card-title"><span className="icon">&#128270;</span> Cenário: Aporte Mínimo para Zerar Imposto a Pagar</div>
           <div id="report-minimo-content"></div>
         </div>
 
@@ -1232,8 +1234,11 @@ export default function Simulador() {
           />
         )}
 
+        <div className="notice" style={{ borderLeftColor: 'var(--danger)' }}>
+          <b>&#9888; Isto não é uma recomendação de investimento.</b> Este simulador é uma ferramenta educativa que realiza cálculos com base nas regras tributárias vigentes (Lei 15.191/2025 e Lei 15.270/2025). Os resultados apresentados são simulações matemáticas — não constituem aconselhamento financeiro, fiscal ou de investimentos. Rentabilidades utilizadas são estimativas e não garantem retorno futuro. Antes de tomar qualquer decisão sobre PGBL, FAPI ou outros investimentos, consulte um contador ou planejador financeiro certificado (CFP/CEA).
+        </div>
         <div className="notice">
-          &#9888; Simulação baseada nas regras oficiais para o ano-calendário 2026, incluindo o Redutor de Imposto (Lei 15.270/2025) para isenção até R$&nbsp;5.000/mes com redução gradual até R$&nbsp;7.350/mes. Consulte um contador para planejamento definitivo.
+          Simulação baseada nas regras oficiais para o ano-calendário 2026, incluindo o Redutor de Imposto para isenção até R$&nbsp;5.000/mês com redução gradual até R$&nbsp;7.350/mês.
         </div>
 
         {/* Fontes oficiais */}
