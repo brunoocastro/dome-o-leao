@@ -18,9 +18,9 @@ Tecnologias: Next.js 15, React 19, TypeScript, Recharts, Vercel Analytics.
 
 ## Docs
 
-- [Metodologia de Calculo](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/CALCULO.md): Documento completo com todas as formulas, tabelas, regras de calculo e fontes oficiais utilizadas no simulador. Inclui INSS progressivo, IRPF com redutor 2026, IRRF, deducoes, PGBL/FAPI (tabelas regressiva e progressiva), e comparativo de investimentos de longo prazo.
-- [Biblioteca de Calculo (calculo.ts)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/lib/calculo.ts): Funcoes puras em TypeScript para calculo de INSS, IRPF, IRRF, simulacao PGBL. Contem todas as constantes oficiais (faixas, aliquotas, deducoes) e tipos (SimState, SimResult).
-- [Biblioteca de Investimentos (investimento.ts)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/lib/investimento.ts): Funcoes para projecao de longo prazo: simulacao PGBL vs investimentos alternativos, tabela regressiva PGBL, presets de investimento (Selic, CDB, LCI/LCA, FIIs, Acoes).
+- [Metodologia de Calculo](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/CALCULO.md): Documento completo com todas as formulas, tabelas, regras de calculo e fontes oficiais utilizadas no simulador. Inclui INSS progressivo, IRPF com redutor 2026, IRRF, deducoes, PGBL/FAPI (tabelas regressiva e progressiva), e comparativo de investimentos de longo prazo.
+- [Biblioteca de Calculo (calculo.ts)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/lib/calculo.ts): Funcoes puras em TypeScript para calculo de INSS, IRPF, IRRF, simulacao PGBL. Contem todas as constantes oficiais (faixas, aliquotas, deducoes) e tipos (SimState, SimResult).
+- [Biblioteca de Investimentos (investimento.ts)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/lib/investimento.ts): Funcoes para projecao de longo prazo: simulacao PGBL vs investimentos alternativos, tabela regressiva PGBL, presets de investimento (Selic, CDB, LCI/LCA, FIIs, Acoes).
 
 ## Fontes Oficiais
 
@@ -32,10 +32,10 @@ Tecnologias: Next.js 15, React 19, TypeScript, Recharts, Vercel Analytics.
 
 ## Codigo-Fonte
 
-- [Componente Simulador (Simulador.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/components/Simulador.tsx): Componente principal React com formulario, calculos e resultados
-- [Comparativo de Investimentos (ComparativoInvestimentos.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/components/ComparativoInvestimentos.tsx): Componente React com grafico Recharts para comparacao PGBL vs alternativas
-- [Layout e SEO (layout.tsx)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/app/layout.tsx): Metadados SEO, JSON-LD, Vercel Analytics
-- [CSS Global (globals.css)](https://raw.githubusercontent.com/brunocastro/dome-o-leao/main/app/globals.css): Design system com variaveis CSS, responsivo (mobile-first)
+- [Componente Simulador (Simulador.tsx)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/components/Simulador.tsx): Componente principal React com formulario, calculos e resultados
+- [Comparativo de Investimentos (ComparativoInvestimentos.tsx)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/components/ComparativoInvestimentos.tsx): Componente React com grafico Recharts para comparacao PGBL vs alternativas
+- [Layout e SEO (layout.tsx)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/app/layout.tsx): Metadados SEO, JSON-LD, Vercel Analytics
+- [CSS Global (globals.css)](https://raw.githubusercontent.com/brunoocastro/dome-o-leao/main/app/globals.css): Design system com variaveis CSS, responsivo (mobile-first)
 
 ## Optional
 

@@ -7,7 +7,12 @@ import {
   DESC_SIMPLIFICADO_TETO, INSS_TETO_MENSAL,
   type SimState, type SimResult,
 } from '@/lib/calculo'
-import ComparativoInvestimentos from '@/components/ComparativoInvestimentos'
+import dynamic from 'next/dynamic'
+
+const ComparativoInvestimentos = dynamic(
+  () => import('@/components/ComparativoInvestimentos'),
+  { ssr: false }
+)
 
 interface SporadicEntry {
   month: string

@@ -99,7 +99,7 @@ A maioria dos simuladores de IRPF para no calculo do imposto. Alguns recomendam 
 ### Instalacao
 
 ```bash
-git clone https://github.com/brunocastro/dome-o-leao.git
+git clone https://github.com/brunoocastro/dome-o-leao.git
 cd dome-o-leao
 npm install
 npm run dev
@@ -228,5 +228,5 @@ MIT - veja [LICENSE](./LICENSE) para detalhes.
 
 <p align="center">
   Feito com TypeScript, cafe e muita tabela da Receita Federal. O leao fica manso quando voce tem os numeros certos.<br/>
-  <a href="https://github.com/brunocastro/dome-o-leao">github.com/brunocastro/dome-o-leao</a>
+  <a href="https://github.com/brunoocastro/dome-o-leao">github.com/brunoocastro/dome-o-leao</a>
 </p>
