@@ -1,0 +1,21 @@
+{
+  "name": "Dome o Leao — Simulador IRPF 2026",
+  "short_name": "Dome o Leao",
+  "description": "Simulador IRPF 2026 com estrategia PGBL/FAPI e comparativo de investimentos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#2ea043",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
