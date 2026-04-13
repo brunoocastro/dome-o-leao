@@ -4,7 +4,12 @@ import {
   BRL, PCT, parseVal,
   calcINSS, calcINSSDetalhado, calcIRPF, calcIRRFMensal,
   simulaPGBL, findAporteMinimo,
-  DESC_SIMPLIFICADO_TETO, INSS_TETO_MENSAL,
+  calcDeducaoDependentesAnual, calcDeducaoEducacao,
+  calcDescontoSimplificado, calcPGBLMaxAnual,
+  calcAliquotaEfetiva, estimarAliquotaMarginal,
+  adjustINSSParaServidor,
+  INSS_TETO_MENSAL, DEPENDENTE_DEDUCAO_MENSAL,
+  IRPF_ALIQUOTA_MAXIMA,
   type SimState, type SimResult,
 } from '@/lib/calculo'
 import dynamic from 'next/dynamic'
@@ -464,7 +469,7 @@ export default function Simulador() {
     const inssMode = (document.querySelector('input[name="inssMode"]:checked') as HTMLInputElement)?.value
     const inssManualM = parseVal((document.getElementById('inssManual') as HTMLInputElement)?.value || '')
     const despMedAnual = parseVal((document.getElementById('despMedicas') as HTMLInputElement)?.value || '')
-    const despEduAnual = Math.min(parseVal((document.getElementById('despEducacao') as HTMLInputElement)?.value || ''), 3561.50 * (dependentes + 1))
+    const despEduAnual = calcDeducaoEducacao(parseVal((document.getElementById('despEducacao') as HTMLInputElement)?.value || ''), dependentes)
     const pensaoM = parseVal((document.getElementById('pensao') as HTMLInputElement)?.value || '')
     const prevType = (document.querySelector('input[name="prevType"]:checked') as HTMLInputElement)?.value
     const prevMensalVal = parseVal((document.getElementById('prevMensal') as HTMLInputElement)?.value || '')
@@ -491,13 +496,13 @@ export default function Simulador() {
     } else {
       const salBase = inputType === 'anual' ? rendaRaw / 12 : rendaRaw
       inssMensal = calcINSS(salBase)
-      if (vinculo === 'servidor') inssMensal = Math.min(inssMensal * 1.14 / 0.14 * 0.11, INSS_TETO_MENSAL)
+      if (vinculo === 'servidor') inssMensal = adjustINSSParaServidor(inssMensal)
     }
     const inssAnual = inssMensal * 12
 
     // Dependentes
-    const deducaoDependentesM = dependentes * 189.59
-    const deducaoDependentesAnual = deducaoDependentesM * 12
+    const deducaoDependentesM = dependentes * DEPENDENTE_DEDUCAO_MENSAL
+    const deducaoDependentesAnual = calcDeducaoDependentesAnual(dependentes)
 
     // Pensao
     const pensaoAnual = pensaoM * 12
@@ -511,7 +516,7 @@ export default function Simulador() {
     const baseCompleta = Math.max(0, rendaAnual - totalDeducoesAnual)
 
     // Modelo simplificado
-    const descontoSimp = Math.min(rendaAnual * 0.20, DESC_SIMPLIFICADO_TETO)
+    const descontoSimp = calcDescontoSimplificado(rendaAnual)
     const baseSimplificada = Math.max(0, rendaAnual - descontoSimp)
 
     // Impostos
@@ -523,7 +528,7 @@ export default function Simulador() {
     const baseFinal = melhorModelo === 'completo' ? baseCompleta : baseSimplificada
 
     // Aliquota efetiva
-    const aliqEfetiva = rendaAnual > 0 ? (impostoFinal / rendaAnual) * 100 : 0
+    const aliqEfetiva = calcAliquotaEfetiva(impostoFinal, rendaAnual)
 
     // IRRF
     const irrfMode = (document.querySelector('input[name="irrfMode"]:checked') as HTMLInputElement)?.value
@@ -541,7 +546,7 @@ export default function Simulador() {
     const resultadoFinal = melhorModelo === 'completo' ? resultadoCompleto : resultadoSimplificado
 
     // PGBL/FAPI estrategia
-    const pgblMaxAnual = rendaAnual * 0.12
+    const pgblMaxAnual = calcPGBLMaxAnual(rendaAnual)
     const pgblFaltante = Math.max(0, pgblMaxAnual - prevAnualAtual)
     const pgblFaltanteM = pgblFaltante / 12
 
@@ -599,7 +604,7 @@ export default function Simulador() {
     }
 
     // Bar
-    const barPct = Math.min(aliqEfetiva / 27.5 * 100, 100)
+    const barPct = Math.min(aliqEfetiva / (IRPF_ALIQUOTA_MAXIMA * 100) * 100, 100)
     const barFill = document.getElementById('bar-fill')
     const barPctEl = document.getElementById('bar-pct')
     if (barFill) barFill.style.width = barPct + '%'
@@ -768,25 +773,8 @@ export default function Simulador() {
       pgblMaxAnual,
       aporteAnualPGBL: pgblMaxAnual, // initial: teto. Updated by calculator slider
       aporteMinimoPGBL: minInfo.aporte,
-      // Alíquota marginal aproximada do IR — usada para estimar o benefício
-      // fiscal do PGBL (quanto o contribuinte "economiza" ao deduzir o aporte).
-      //
-      // Cálculo: alíquota efetiva (impostoFinal / rendaAnual) × 1.5, limitada a 27,5%.
-      // O fator 1.5 converte a alíquota efetiva em uma aproximação da alíquota
-      // MARGINAL (a faixa onde incide o próximo real de renda). Exemplo:
-      //   - Alíquota efetiva de 15% → marginal estimada: 22,5%
-      //   - Alíquota efetiva de 18% → marginal estimada: 27% (limitada a 27,5%)
-      //
-      // Esse é um valor estimado. A alíquota marginal real depende da faixa exata
-      // da tabela progressiva (Lei 15.191/2025): 0%, 7,5%, 15%, 22,5% ou 27,5%.
-      // Para cálculo preciso, seria necessário identificar a faixa da base de cálculo.
-      //
-      // Fallback: 15% quando a alíquota efetiva é zero (contribuinte isento ou
-      // com redutor zerando o imposto).
-      //
-      // Fonte: Tabela Progressiva Anual IRPF 2026 — Lei nº 15.191/2025
-      // https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026
-      aliquotaMarginalIR: aliqEfet > 0 ? Math.min(aliqEfet * 1.5, 0.275) : 0.15,
+      // Alíquota marginal estimada — documentação completa em lib/calculo.ts → estimarAliquotaMarginal()
+      aliquotaMarginalIR: estimarAliquotaMarginal(aliqEfet),
       rendaAnual,
     })
 
