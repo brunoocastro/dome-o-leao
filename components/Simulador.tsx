@@ -29,6 +29,7 @@ export default function Simulador() {
   // State for investment comparison props
   const [compProps, setCompProps] = useState<{
     pgblMaxAnual: number
+    aporteAnualPGBL: number
     aporteMinimoPGBL: number
     aliquotaMarginalIR: number
     rendaAnual: number
@@ -409,6 +410,9 @@ export default function Simulador() {
       const semPgbl = simulaPGBL(st, 0)
       const diff = semPgbl.resultFinal - sim.resultFinal
 
+      // Sync aporte to investment comparison
+      setCompProps(prev => prev ? { ...prev, aporteAnualPGBL: pgblTotal } : prev)
+
       if (!resultDiv) return
       resultDiv.innerHTML = `
       <div class="calc-result-grid">
@@ -762,8 +766,27 @@ export default function Simulador() {
     const aliqEfet = rendaAnual > 0 ? impostoFinal / rendaAnual : 0
     setCompProps({
       pgblMaxAnual,
+      aporteAnualPGBL: pgblMaxAnual, // initial: teto. Updated by calculator slider
       aporteMinimoPGBL: minInfo.aporte,
-      aliquotaMarginalIR: aliqEfet > 0 ? Math.min(aliqEfet * 1.5, 0.275) : 0.15, // approximate marginal rate
+      // Alíquota marginal aproximada do IR — usada para estimar o benefício
+      // fiscal do PGBL (quanto o contribuinte "economiza" ao deduzir o aporte).
+      //
+      // Cálculo: alíquota efetiva (impostoFinal / rendaAnual) × 1.5, limitada a 27,5%.
+      // O fator 1.5 converte a alíquota efetiva em uma aproximação da alíquota
+      // MARGINAL (a faixa onde incide o próximo real de renda). Exemplo:
+      //   - Alíquota efetiva de 15% → marginal estimada: 22,5%
+      //   - Alíquota efetiva de 18% → marginal estimada: 27% (limitada a 27,5%)
+      //
+      // Esse é um valor estimado. A alíquota marginal real depende da faixa exata
+      // da tabela progressiva (Lei 15.191/2025): 0%, 7,5%, 15%, 22,5% ou 27,5%.
+      // Para cálculo preciso, seria necessário identificar a faixa da base de cálculo.
+      //
+      // Fallback: 15% quando a alíquota efetiva é zero (contribuinte isento ou
+      // com redutor zerando o imposto).
+      //
+      // Fonte: Tabela Progressiva Anual IRPF 2026 — Lei nº 15.191/2025
+      // https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026
+      aliquotaMarginalIR: aliqEfet > 0 ? Math.min(aliqEfet * 1.5, 0.275) : 0.15,
       rendaAnual,
     })
 
@@ -1228,6 +1251,7 @@ export default function Simulador() {
         {compProps && (
           <ComparativoInvestimentos
             pgblMaxAnual={compProps.pgblMaxAnual}
+            aporteAnualPGBL={compProps.aporteAnualPGBL}
             aporteMinimoPGBL={compProps.aporteMinimoPGBL}
             aliquotaMarginalIR={compProps.aliquotaMarginalIR}
             rendaAnual={compProps.rendaAnual}

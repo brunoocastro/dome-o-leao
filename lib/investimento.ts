@@ -21,7 +21,18 @@ export interface InvestmentParams {
   irSobreLucroAlt: number;   // e.g. 0.15 for 15%
   tabelaPGBL: 'regressiva' | 'progressiva';
   horizonteAnos: number;
-  aliquotaMarginalIR: number; // user's marginal IR rate for deduction benefit
+  /**
+   * Alíquota marginal aproximada do IRPF do contribuinte.
+   * Usada para calcular o benefício fiscal do PGBL: cada R$ 1 aportado
+   * "economiza" R$ aliquotaMarginalIR de imposto.
+   *
+   * Calculada como: alíquota efetiva × 1.5 (estimativa da faixa marginal),
+   * limitada a 27,5%. Fallback: 15% se alíquota efetiva for zero.
+   *
+   * Fonte: Tabela Progressiva IRPF 2026 — Lei nº 15.191/2025
+   * Faixas: 0% | 7,5% | 15% | 22,5% | 27,5%
+   */
+  aliquotaMarginalIR: number;
 }
 
 export interface YearProjection {

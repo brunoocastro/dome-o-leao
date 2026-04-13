@@ -18,6 +18,7 @@ import { BRL, PCT } from '@/lib/calculo'
 
 interface ComparativoProps {
   pgblMaxAnual: number
+  aporteAnualPGBL: number
   aporteMinimoPGBL: number
   aliquotaMarginalIR: number
   rendaAnual: number
@@ -29,15 +30,16 @@ interface ComparativoProps {
 
 export default function ComparativoInvestimentos({
   pgblMaxAnual,
+  aporteAnualPGBL,
   aporteMinimoPGBL,
   aliquotaMarginalIR,
   rendaAnual,
 }: ComparativoProps) {
+  // ── Derived: aporte comes from the calculator section above ─────────────
+  const aporteMensal = aporteAnualPGBL > 0 ? aporteAnualPGBL / 12 : 0
+
   // ── State ────────────────────────────────────────────────────────────────
   const [horizonte, setHorizonte] = useState(15)
-  const [aporteMensal, setAporteMensal] = useState(
-    pgblMaxAnual > 0 ? Math.round((pgblMaxAnual / 12) * 100) / 100 : 0,
-  )
   const [saldoAtual, setSaldoAtual] = useState(0)
   const [rendPGBL, setRendPGBL] = useState(12)
   const [tipoAlt, setTipoAlt] = useState<string>('selic')
@@ -63,9 +65,9 @@ export default function ComparativoInvestimentos({
   // ── Computed ─────────────────────────────────────────────────────────────
 
   const projecoes = useMemo(() => {
-    if (horizonte < 1 || aporteMensal < 0) return []
+    if (horizonte < 1 || aporteAnualPGBL < 0) return []
     return simulaInvestimentoLongoPrazo({
-      aporteAnualPGBL: aporteMensal * 12,
+      aporteAnualPGBL,
       aporteMinimoPGBL,
       saldoAtualPGBL: saldoAtual,
       rendimentoPGBL: rendPGBL,
@@ -76,7 +78,7 @@ export default function ComparativoInvestimentos({
       aliquotaMarginalIR,
     })
   }, [
-    aporteMensal, aporteMinimoPGBL, saldoAtual, rendPGBL,
+    aporteAnualPGBL, aporteMinimoPGBL, saldoAtual, rendPGBL,
     rendAlt, irAlt, isentoAlt, tabelaPGBL,
     horizonte, aliquotaMarginalIR,
   ])
@@ -147,19 +149,13 @@ export default function ComparativoInvestimentos({
             </div>
           </div>
 
-          {/* Aporte mensal */}
+          {/* Aporte — vem da calculadora acima */}
           <div className="field">
-            <label>Aporte Mensal PGBL (teto)</label>
-            <small>Valor considerado para cenário PGBL máximo</small>
-            <div className="input-wrap">
-              <span className="prefix">R$</span>
-              <input
-                type="number"
-                value={aporteMensal.toFixed(2)}
-                onChange={e => setAporteMensal(+e.target.value)}
-                step="100"
-                style={{ paddingLeft: 36 }}
-              />
+            <label>Aporte PGBL Considerado</label>
+            <small>Valor definido na calculadora interativa acima</small>
+            <div className="inss-computed">
+              <span className="inss-val">{BRL(aporteMensal)}</span>
+              <span className="inss-computed-sub">/ mês ({BRL(aporteAnualPGBL)} / ano)</span>
             </div>
           </div>
 
