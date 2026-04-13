@@ -384,10 +384,11 @@ describe('Comparativo PGBL vs investimentos alternativos', () => {
 
   const investmentScenarios = [
     { tipo: 'selic', rendPGBL: 12, rendAlt: 14.75, irAlt: 0.15, isento: false },
-    { tipo: 'cdb-100', rendPGBL: 12, rendAlt: 14.50, irAlt: 0.15, isento: false },
-    { tipo: 'cdb-110', rendPGBL: 12, rendAlt: 15.95, irAlt: 0.15, isento: false },
-    { tipo: 'lci-lca', rendPGBL: 12, rendAlt: 13.20, irAlt: 0, isento: true },
-    { tipo: 'fii', rendPGBL: 12, rendAlt: 10.00, irAlt: 0, isento: true },
+    { tipo: 'selic-media', rendPGBL: 12, rendAlt: 9.57, irAlt: 0.15, isento: false },
+    { tipo: 'cdb-100', rendPGBL: 12, rendAlt: 14.65, irAlt: 0.15, isento: false },
+    { tipo: 'cdb-110', rendPGBL: 12, rendAlt: 16.12, irAlt: 0.15, isento: false },
+    { tipo: 'lci-lca', rendPGBL: 12, rendAlt: 13.33, irAlt: 0, isento: true },
+    { tipo: 'fii', rendPGBL: 12, rendAlt: 8.00, irAlt: 0, isento: true },
     { tipo: 'ibovespa', rendPGBL: 12, rendAlt: 12.00, irAlt: 0.15, isento: false },
   ];
 

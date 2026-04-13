@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
@@ -10,7 +10,7 @@ import {
   type InvestmentParams,
   type InvestmentPreset,
 } from '@/lib/investimento'
-import { BRL, PCT } from '@/lib/calculo'
+import { BRL, PCT, parseVal } from '@/lib/calculo'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -41,6 +41,24 @@ export default function ComparativoInvestimentos({
   // ── State ────────────────────────────────────────────────────────────────
   const [horizonte, setHorizonte] = useState(15)
   const [saldoAtual, setSaldoAtual] = useState(0)
+  const saldoRef = useRef<HTMLInputElement>(null)
+
+  const handleSaldoInput = useCallback(() => {
+    const el = saldoRef.current
+    if (!el) return
+    let v = el.value.replace(/\D/g, '')
+    if (!v) { el.value = ''; setSaldoAtual(0); return }
+    const num = parseInt(v, 10) / 100
+    el.value = num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    setSaldoAtual(num)
+  }, [])
+
+  useEffect(() => {
+    const el = saldoRef.current
+    if (!el) return
+    el.addEventListener('input', handleSaldoInput)
+    return () => el.removeEventListener('input', handleSaldoInput)
+  }, [handleSaldoInput])
   const [rendPGBL, setRendPGBL] = useState(12)
   const [tipoAlt, setTipoAlt] = useState<string>('selic')
   const [rendAlt, setRendAlt] = useState(14.75)
@@ -166,10 +184,11 @@ export default function ComparativoInvestimentos({
             <div className="input-wrap">
               <span className="prefix">R$</span>
               <input
-                type="number"
-                value={saldoAtual}
-                onChange={e => setSaldoAtual(+e.target.value)}
-                step="1000"
+                ref={saldoRef}
+                type="text"
+                className="currency"
+                placeholder="0,00"
+                inputMode="numeric"
                 style={{ paddingLeft: 36 }}
               />
             </div>

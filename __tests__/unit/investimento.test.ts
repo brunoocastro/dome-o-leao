@@ -262,9 +262,9 @@ describe('constants', () => {
     expect(last.aliq).toBe(0.10)
   })
 
-  it('INVESTMENT_PRESETS has 7 entries including personalizado', () => {
+  it('INVESTMENT_PRESETS has 8 entries including selic-media and personalizado', () => {
     const keys = Object.keys(INVESTMENT_PRESETS)
-    expect(keys).toHaveLength(7)
+    expect(keys).toHaveLength(8)
     expect(keys).toContain('personalizado')
   })
 

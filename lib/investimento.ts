@@ -87,13 +87,39 @@ export const RENDA_FIXA_IR: ReadonlyArray<{ ateDias: number; aliq: number }> = [
   { ateDias: Infinity, aliq: 0.15 },
 ];
 
+/**
+ * Presets de investimentos alternativos com taxas baseadas em dados públicos.
+ *
+ * Fontes:
+ * - Selic atual: 14,75% a.a. (COPOM 18/03/2026) — bcb.gov.br
+ * - Selic média 10 anos: 9,57% a.a. (2016-2025, média das metas anuais) — BCB/COPOM
+ * - CDI: ~0,10pp abaixo da Selic — cetip.com.br
+ * - LCI/LCA: 90-93% do CDI (média de mercado) — Investidor10, InfoMoney
+ * - IFIX DY: ~8% médio 10 anos — Economatica (insight.economatica.com)
+ * - IBOVESPA: ~12% nominal médio 10 anos, ~6,9% real 50 anos — B3, Economatica
+ * - CDB 110%: bancos digitais/menores, maior risco — Investidor10
+ *
+ * @see https://www.bcb.gov.br/controleinflacao/taxaselic
+ * @see https://investidor10.com.br/indices/cdi/
+ * @see https://insight.economatica.com/dividend-yield-medio-dos-indices/
+ * @see https://insight.economatica.com/desempenho-do-ibovespa-50-anos-de-historia/
+ */
 export const INVESTMENT_PRESETS: Record<string, InvestmentPreset> = {
-  'selic': { nome: 'Tesouro Selic', taxa: 14.75, irAliq: 0.15, isento: false },
-  'cdb-100': { nome: 'CDB 100% CDI', taxa: 14.50, irAliq: 0.15, isento: false },
-  'cdb-110': { nome: 'CDB 110% CDI', taxa: 15.95, irAliq: 0.15, isento: false },
-  'lci-lca': { nome: 'LCI/LCA 91% CDI', taxa: 13.20, irAliq: 0, isento: true },
-  'fii': { nome: 'FIIs (media div. yield)', taxa: 10.00, irAliq: 0, isento: true },
-  'ibovespa': { nome: 'Acoes (IBOV media)', taxa: 12.00, irAliq: 0.15, isento: false },
+  // Selic atual (COPOM 18/03/2026)
+  'selic': { nome: 'Tesouro Selic (atual)', taxa: 14.75, irAliq: 0.15, isento: false },
+  // Selic média dos últimos 10 anos (2016-2025): média das metas anuais do COPOM
+  'selic-media': { nome: 'Selic Média (10 anos)', taxa: 9.57, irAliq: 0.15, isento: false },
+  // CDI acompanha a Selic com ~0,10pp de diferença
+  'cdb-100': { nome: 'CDB 100% CDI', taxa: 14.65, irAliq: 0.15, isento: false },
+  // CDB 110%: bancos digitais/menores oferecem prêmio sobre o CDI (maior risco de crédito)
+  'cdb-110': { nome: 'CDB 110% CDI', taxa: 16.12, irAliq: 0.15, isento: false },
+  // LCI/LCA: média de mercado 91% do CDI, isentas de IR para PF
+  'lci-lca': { nome: 'LCI/LCA 91% CDI', taxa: 13.33, irAliq: 0, isento: true },
+  // FIIs: dividend yield médio do IFIX nos últimos 10 anos (~8%), dividendos isentos para PF
+  'fii': { nome: 'FIIs (IFIX DY médio)', taxa: 8.00, irAliq: 0, isento: true },
+  // IBOVESPA: retorno nominal médio ~12% a.a. (últimos 10 anos), IR de 15% sobre ganho líquido
+  'ibovespa': { nome: 'Ações (IBOV 10 anos)', taxa: 12.00, irAliq: 0.15, isento: false },
+  // Personalizado: permite ao usuário definir taxa e IR manualmente
   'personalizado': { nome: 'Personalizado', taxa: 12.00, irAliq: 0.15, isento: false },
 };
 
