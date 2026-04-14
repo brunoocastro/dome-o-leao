@@ -352,7 +352,7 @@ test.describe('Investment Comparison', () => {
     // Wait for dynamic component
     await page.waitForSelector('.inv-chart-wrap', { state: 'visible', timeout: 15000 })
 
-    const chartWrap = page.locator('.inv-chart-wrap')
+    const chartWrap = page.locator('.inv-chart-wrap').first()
     await expect(chartWrap).toBeVisible()
   })
 })

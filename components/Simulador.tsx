@@ -19,6 +19,11 @@ const ComparativoInvestimentos = dynamic(
   { ssr: false }
 )
 
+const SimuladorAposentadoria = dynamic(
+  () => import('@/components/SimuladorAposentadoria'),
+  { ssr: false }
+)
+
 interface SporadicEntry {
   month: string
   value: number
@@ -1237,13 +1242,20 @@ export default function Simulador() {
 
         {/* Comparativo de Investimentos */}
         {compProps && (
-          <ComparativoInvestimentos
-            pgblMaxAnual={compProps.pgblMaxAnual}
-            aporteAnualPGBL={compProps.aporteAnualPGBL}
-            aporteMinimoPGBL={compProps.aporteMinimoPGBL}
-            aliquotaMarginalIR={compProps.aliquotaMarginalIR}
-            rendaAnual={compProps.rendaAnual}
-          />
+          <>
+            <ComparativoInvestimentos
+              pgblMaxAnual={compProps.pgblMaxAnual}
+              aporteAnualPGBL={compProps.aporteAnualPGBL}
+              aporteMinimoPGBL={compProps.aporteMinimoPGBL}
+              aliquotaMarginalIR={compProps.aliquotaMarginalIR}
+              rendaAnual={compProps.rendaAnual}
+            />
+            <SimuladorAposentadoria
+              pgblMaxAnual={compProps.pgblMaxAnual}
+              aporteAnualPGBL={compProps.aporteAnualPGBL}
+              rendaAnual={compProps.rendaAnual}
+            />
+          </>
         )}
 
         <div className="notice" style={{ borderLeftColor: 'var(--danger)' }}>
